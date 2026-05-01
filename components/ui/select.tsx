@@ -32,6 +32,14 @@ interface Props<T extends string> {
   className?: string;
   /** Disabled trigger. */
   disabled?: boolean;
+  /**
+   * `boxed` (default): bordered, padded, fixed-width — fits inside form rows.
+   * `inline`: borderless inline-text trigger (e.g. "Sort by: Recent ▾") for
+   * unobtrusive in-flow use. Menu still gets the bordered popover.
+   */
+  variant?: "boxed" | "inline";
+  /** Optional prefix label for the inline variant (e.g. "Sort by:"). */
+  inlinePrefix?: string;
 }
 
 /**
@@ -53,6 +61,8 @@ export function Select<T extends string>({
   "aria-label": ariaLabel,
   className,
   disabled,
+  variant = "boxed",
+  inlinePrefix,
 }: Props<T>) {
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -162,8 +172,10 @@ export function Select<T extends string>({
     }
   };
 
+  const isInline = variant === "inline";
+
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", isInline ? "inline-block" : "", className)}>
       <button
         ref={triggerRef}
         type="button"
@@ -176,14 +188,22 @@ export function Select<T extends string>({
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onTriggerKey}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-md border border-cream-300 bg-cream-50 px-3 py-2 text-sm text-ink-500 transition-colors",
-          "hover:bg-cream-200 focus:outline-none focus:ring-2 focus:ring-moss-500/40 disabled:opacity-60 disabled:cursor-not-allowed",
+          "flex items-center gap-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+          isInline
+            ? "px-0 py-0 text-sm text-ink-50 hover:text-ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss-500/40 rounded-sm"
+            : "w-full justify-between rounded-md border border-cream-300 bg-cream-50 px-3 py-2 text-sm text-ink-500 hover:bg-cream-200 focus:outline-none focus:ring-2 focus:ring-moss-500/40",
         )}
       >
-        <span className="truncate">{triggerText}</span>
+        {isInline && inlinePrefix ? (
+          <span className="text-ink-50">{inlinePrefix}</span>
+        ) : null}
+        <span className={cn("truncate", isInline && "font-medium text-ink-500")}>
+          {triggerText}
+        </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 flex-shrink-0 text-cream-400 transition-transform",
+            "h-4 w-4 flex-shrink-0 transition-transform",
+            isInline ? "text-ink-50" : "text-cream-400",
             open && "rotate-180",
           )}
           strokeWidth={1.75}
@@ -199,7 +219,10 @@ export function Select<T extends string>({
           tabIndex={-1}
           aria-activedescendant={`${id}-opt-${highlight}`}
           onKeyDown={onMenuKey}
-          className="absolute left-0 top-[calc(100%+4px)] z-50 min-w-full overflow-auto rounded-md border border-cream-300 bg-cream-50 py-1 shadow-[0_2px_4px_rgba(26,31,27,0.08),0_16px_40px_rgba(26,31,27,0.10)] focus:outline-none"
+          className={cn(
+            "absolute top-[calc(100%+4px)] z-50 overflow-auto rounded-md border border-cream-300 bg-cream-50 py-1 shadow-[0_2px_4px_rgba(26,31,27,0.08),0_16px_40px_rgba(26,31,27,0.10)] focus:outline-none",
+            isInline ? "right-0 min-w-[180px]" : "left-0 min-w-full",
+          )}
           style={{ maxHeight: "calc(min(60vh, 320px))" }}
         >
           {options.map((opt, i) => {
