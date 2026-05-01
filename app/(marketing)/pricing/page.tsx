@@ -1,59 +1,138 @@
-import type { Metadata } from "next";
+"use client";
 
-import { PricingCards } from "@/components/marketing/pricing-cards";
-import { FeatureMatrix } from "@/components/marketing/feature-matrix";
-import { Faq } from "@/components/marketing/faq";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "Free for browsing. $3 to unlock with refund-on-ship. $15/mo if you'd rather subscribe.",
-};
-
-const faqs = [
-  {
-    question: "How does the refund-on-ship work?",
-    answer:
-      "Build a working URL within 60 days of unlocking — even just a real landing page with email signup counts. Submit it on your dashboard. Auto-validation runs on the spot (real domain, registered after unlock, real content), and the $3 is refunded back to your card within 7 days. Edge cases get a quick human review.",
-  },
-  {
-    question: "Can I switch from per-unlock to Pro later?",
-    answer:
-      "Yes, anytime. After ~5 unlocks in a month you're already paying more than Pro, so we'll suggest the upgrade automatically. Pro starts the moment you subscribe — no waiting, no migration.",
-  },
-  {
-    question: "What's inside an unlocked brief?",
-    answer:
-      "The pain (with 3–5 quoted excerpts from the original posts), who buys it and where they hang out, existing solutions and their prices, the wedge they're missing, sample landing-page copy, a 3-step validation plan, and distribution channels with traffic estimates. You get it as a watermarked PDF you keep forever.",
-  },
-  {
-    question: "Do you offer team plans?",
-    answer:
-      "Not yet. Pannly is built for solo indie hackers and small studios. We'll consider team billing only after we hit a wall of demand for it.",
-  },
-];
+import { FaqSection } from "@/components/pricing/faq-section";
+import { FeatureMatrix } from "@/components/pricing/feature-matrix";
+import { PricingCard } from "@/components/pricing/pricing-card";
+import { ApiError } from "@/lib/api-client";
+import { startProMonthly } from "@/lib/api/checkout";
+import { useAuth } from "@/lib/auth-context";
+import { env } from "@/lib/env";
 
 export default function PricingPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [subscribing, setSubscribing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Real prices come from env (so they match what Dodo charges).
+  const unlockPrice = env.prices.unlockDefaultUsd;
+  const proMonthly = env.prices.proMonthlyUsd;
+
+  const onSubscribe = async () => {
+    if (!user) {
+      router.push("/login?next=/pricing" as Route);
+      return;
+    }
+    setSubscribing(true);
+    setErrorMessage(null);
+    try {
+      const { checkout_url } = await startProMonthly({
+        // The confirming overlay on /billing polls /v1/me/last-checkout until
+        // it sees succeeded or failed.
+        return_url: `${env.appBaseUrl}/billing?confirming=1`,
+        cancel_url: `${env.appBaseUrl}/pricing`,
+      });
+      if (checkout_url) {
+        window.location.href = checkout_url;
+      } else {
+        setErrorMessage("Couldn't start checkout. Try again in a moment.");
+        setSubscribing(false);
+      }
+    } catch (err) {
+      setErrorMessage(
+        err instanceof ApiError ? err.message : "Couldn't start checkout. Try again.",
+      );
+      setSubscribing(false);
+    }
+  };
+
   return (
-    <>
-      <section className="px-6 md:px-12 pb-16 pt-24 text-center">
-        <span className="mb-4 block font-mono text-xs font-semibold uppercase tracking-[0.2em] text-plum-500">
+    <div className="bg-cream-100">
+      {/* Hero */}
+      <section className="mx-auto max-w-7xl px-6 pb-16 pt-24 text-center">
+        <span className="mb-4 block font-mono text-xs font-semibold uppercase tracking-[0.15em] text-plum-500">
           Pricing
         </span>
-        <h1 className="mx-auto mb-6 max-w-3xl font-display text-4xl font-medium tracking-tight text-ink-700 md:text-5xl">
+        <h1 className="mb-6 font-display text-5xl font-semibold tracking-tight text-ink-700 md:text-6xl">
           Three ways to use Pannly
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-ink-50/80">
-          Free for browsing. $3 to unlock with refund-on-ship. $15/mo if you&apos;d
-          rather subscribe.
+        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-ink-50">
+          Whether you're exploring your first idea or shipping your tenth product, we have a
+          model that respects your craftsmanship.
         </p>
       </section>
 
-      <PricingCards />
+      {/* Plans */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <PricingCard
+            name="Explorer"
+            blurb="For those gathering inspiration and early signals."
+            price="$0"
+            unit="/ forever"
+            features={[
+              { label: "Browse public archives" },
+              { label: "3 daily idea previews" },
+              { label: "Basic trend signals" },
+            ]}
+            cta={{
+              label: user ? "Browse the feed" : "Start exploring",
+              onClick: () => router.push((user ? "/feed" : "/signup") as Route),
+            }}
+          />
+
+          <PricingCard
+            highlighted
+            badge="Most Popular"
+            name="A La Carte"
+            blurb="Purchase detailed briefs only when you need them."
+            price={`$${unlockPrice}`}
+            unit="/ per brief"
+            features={[
+              { label: "Full PDF teardown" },
+              { label: "Competitor matrix" },
+              { label: "Refund-on-ship guarantee", emphasis: true },
+            ]}
+            cta={{
+              label: "Browse briefs",
+              onClick: () => router.push("/feed" as Route),
+            }}
+          />
+
+          <PricingCard
+            name="Artisan"
+            blurb="For serial builders who require constant input."
+            price={`$${proMonthly}`}
+            unit="/ month"
+            features={[
+              { label: "Unlimited briefs" },
+              { label: "Early access to new drops" },
+              { label: "Private builder community" },
+            ]}
+            cta={{
+              label: user ? "Subscribe" : "Sign up to subscribe",
+              onClick: onSubscribe,
+              loading: subscribing,
+            }}
+          />
+        </div>
+
+        {errorMessage ? (
+          <div
+            role="alert"
+            className="mx-auto mt-6 max-w-md rounded-md border border-error/30 bg-error/10 px-4 py-3 text-center text-sm text-error"
+          >
+            {errorMessage}
+          </div>
+        ) : null}
+      </section>
 
       <FeatureMatrix />
-
-      <Faq items={faqs} />
-    </>
+      <FaqSection />
+    </div>
   );
 }

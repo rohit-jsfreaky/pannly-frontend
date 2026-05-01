@@ -1,20 +1,26 @@
 import { redirect } from "next/navigation";
 
+import { SiteFooter } from "@/components/footer/site-footer";
+import { TopNav } from "@/components/nav/top-nav";
 import { getCurrentUser } from "@/lib/auth-server";
 
 /**
  * Authenticated-section guard. Anything under /(app) requires a valid
  * session. If absent we bounce to /login.
  *
- * For action-driven gates (clicking "Unlock $3" while logged out on a public
- * page) the client-side useRequireAuth hook handles the `?next=` query so
- * the user lands back where they tried to go. The server-side guard here
- * just enforces the protection.
+ * Shares TopNav + SiteFooter with /(marketing) so the chrome is identical
+ * across public + private pages.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login");
   }
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen flex-col bg-cream-100">
+      <TopNav />
+      <main className="flex flex-1 flex-col">{children}</main>
+      <SiteFooter />
+    </div>
+  );
 }

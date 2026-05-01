@@ -10,6 +10,10 @@ interface Props {
   items: FeedIdea[];
   loading: boolean;
   error: string | null;
+  /** Slugs the current user has paid for — drives the "Unlocked" CTA on cards. */
+  unlockedSlugs: Set<string>;
+  /** When true (Pro/Lifetime subscription) every card renders as unlocked. */
+  hasProAccess: boolean;
 }
 
 /**
@@ -18,7 +22,7 @@ interface Props {
  * On filter changes we keep the previous list rendered while the next one
  * loads — no flicker.
  */
-export function FeedList({ items, loading, error }: Props) {
+export function FeedList({ items, loading, error, unlockedSlugs, hasProAccess }: Props) {
   // First load — no items yet.
   const showSkeleton = loading && items.length === 0;
 
@@ -50,7 +54,12 @@ export function FeedList({ items, loading, error }: Props) {
     >
       <div className="flex flex-col gap-6">
         {items.map((idea, i) => (
-          <IdeaCard key={idea.slug} idea={idea} emphasised={i === 0} />
+          <IdeaCard
+            key={idea.slug}
+            idea={idea}
+            emphasised={i === 0}
+            unlocked={hasProAccess || unlockedSlugs.has(idea.slug)}
+          />
         ))}
       </div>
     </Skeleton>

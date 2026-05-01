@@ -1,6 +1,7 @@
 "use client";
 
 import type { Route } from "next";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -15,14 +16,17 @@ interface Props {
   idea: FeedIdea;
   /** True when this is the first card on the page — used as a thumb-stop visual. */
   emphasised?: boolean;
+  /** True if the current user already owns this idea — swaps the CTA. */
+  unlocked?: boolean;
 }
 
 /**
- * One row in the feed list. The action button is auth-aware: clicking
- * "Unlock" while logged out pushes to /login?next=/ideas/{slug} so the user
- * lands on the idea page after sign-in.
+ * One row in the feed list. CTA varies by state:
+ *   - logged out → "Unlock $X" → /login?next=/ideas/{slug}
+ *   - logged in, not yet unlocked → "Unlock $X" → /ideas/{slug}
+ *   - logged in, unlocked → "Unlocked" → /ideas/{slug} (already-unlocked variant)
  */
-export function IdeaCard({ idea, emphasised }: Props) {
+export function IdeaCard({ idea, emphasised, unlocked }: Props) {
   const router = useRouter();
   const { user } = useAuth();
   const ideaPath = `/ideas/${idea.slug}` as Route;
@@ -40,6 +44,7 @@ export function IdeaCard({ idea, emphasised }: Props) {
       className={cn(
         "flex flex-col gap-4 rounded-xl border border-cream-300 bg-cream-50 p-6 transition-shadow hover:shadow-soft",
         emphasised && "shadow-soft",
+        unlocked && "border-moss-600/30",
       )}
     >
       <header className="flex items-start justify-between gap-4">
@@ -77,14 +82,25 @@ export function IdeaCard({ idea, emphasised }: Props) {
             <span className="text-ink-500">{idea.shipped_count}</span> shipped
           </span>
         </div>
-        <Button
-          onClick={onUnlock}
-          variant={emphasised ? "primary" : "secondary"}
-          size="md"
-          className="self-stretch sm:self-auto"
-        >
-          Unlock {formatMoney(idea.unlock_price_cents)}
-        </Button>
+
+        {unlocked ? (
+          <Link
+            href={ideaPath}
+            className="inline-flex items-center justify-center gap-2 self-stretch rounded-md border border-moss-600/30 bg-moss-100 px-5 py-2.5 text-base font-medium text-moss-700 transition-colors hover:bg-moss-100/70 sm:self-auto"
+          >
+            <CheckCircle2 className="h-4 w-4" strokeWidth={2} aria-hidden />
+            Unlocked
+          </Link>
+        ) : (
+          <Button
+            onClick={onUnlock}
+            variant={emphasised ? "primary" : "secondary"}
+            size="md"
+            className="self-stretch sm:self-auto"
+          >
+            Unlock {formatMoney(idea.unlock_price_cents)}
+          </Button>
+        )}
       </footer>
     </article>
   );

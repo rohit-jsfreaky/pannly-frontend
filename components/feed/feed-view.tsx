@@ -8,6 +8,7 @@ import { FeedPopularTags } from "@/components/feed/feed-popular-tags";
 import type { FeedSort, FeedTopic } from "@/lib/api/feed";
 import { useFeed, useFeedSidebar } from "@/lib/hooks/use-feed";
 import { useFeedParams } from "@/lib/hooks/use-feed-params";
+import { useMyUnlockedSlugs } from "@/lib/hooks/use-unlocked-slugs";
 
 const FALLBACK_TOPICS: FeedTopic[] = [
   { slug: "all", label: "All Topics", count: 0 },
@@ -29,6 +30,8 @@ export function FeedView() {
   const { params, setParams } = useFeedParams();
   const { data, loading, error } = useFeed(params);
   const sidebar = useFeedSidebar();
+  // Fires ONCE per session for logged-in users; empty for anon.
+  const { slugs: unlockedSlugs, hasProAccess } = useMyUnlockedSlugs();
 
   const topics = sidebar.topics?.topics ?? FALLBACK_TOPICS;
   const popular = sidebar.popular?.tags ?? null;
@@ -66,6 +69,8 @@ export function FeedView() {
             items={data?.items ?? []}
             loading={loading}
             error={error}
+            unlockedSlugs={unlockedSlugs}
+            hasProAccess={hasProAccess}
           />
           {data?.pagination ? (
             <FeedPagination
