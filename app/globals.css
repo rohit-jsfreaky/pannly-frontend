@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+/* =========================================================
+ * Pannly design system — Tailwind v4 CSS-first theme.
+ * Tokens here mirror plan.md Section 3.3 and stitch_prompt.md.
+ * ========================================================= */
+
+@theme {
+  /* Palette is calibrated to the rendered Stitch screens (not the Material-3
+     token names in their HTML). All hexes below are sampled from the actual UI.
+     Slightly cooler / more neutral than the original warm-cream draft. */
+
+  /* ---------- Moss (primary) ---------- */
+  --color-moss-50: #eef3f0;
+  --color-moss-100: #d7e1db;
+  --color-moss-200: #b0c3b8;
+  --color-moss-300: #84a491;
+  --color-moss-400: #5c8470;
+  --color-moss-500: #426456; /* nav text + secondary primary */
+  --color-moss-600: #2a4c3f; /* default primary CTA bg */
+  --color-moss-700: #1f3a2e;
+  --color-moss-800: #142a21;
+  --color-moss-900: #0b1b14;
+
+  /* ---------- Cream / surface ---------- */
+  --color-cream-50: #ffffff;  /* lifted card bg over the page */
+  --color-cream-100: #faf9f7; /* page background */
+  --color-cream-200: #f4f4f1; /* recessed surface — bands, subtle panels */
+  --color-cream-300: #c1c8c3; /* default border (cool, visible against cream) */
+  --color-cream-400: #717974; /* stronger outline / icons */
+
+  /* ---------- Ink (text) ---------- */
+  --color-ink-50: #414844;  /* secondary body text */
+  --color-ink-500: #1a1c1b; /* default body */
+  --color-ink-700: #0f1310; /* headlines */
+  --color-ink-900: #060807;
+
+  /* ---------- Plum / wine (accent) ---------- */
+  --color-plum-100: #ffdad7;
+  --color-plum-300: #f0b9b5;
+  --color-plum-500: #613b38; /* "refunded" italic, +$3 to unlock pill, counters */
+  --color-plum-700: #4a2a28;
+
+  /* ---------- Sage (secondary cool) ---------- */
+  --color-sage-100: #cfe3c4;
+  --color-sage-300: #b9ccae;
+  --color-sage-500: #52634b;
+
+  /* ---------- Functional ---------- */
+  --color-success: #5c8470;
+  --color-warning: #f0b9b5;
+  --color-error: #8e3f4a;
+  --color-info: #5f6f7e;
+
+  /* ---------- Fonts (configured via next/font in layout.tsx) ---------- */
+  --font-display: var(--font-fraunces), "Charter", Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", monospace;
+
+  /* ---------- Shadows ---------- */
+  --shadow-soft:
+    0 1px 2px rgba(26, 31, 27, 0.06), 0 8px 24px rgba(26, 31, 27, 0.08);
+  --shadow-soft-lg:
+    0 2px 4px rgba(26, 31, 27, 0.08), 0 16px 40px rgba(26, 31, 27, 0.1);
+
+  /* ---------- Radii (Tailwind v4 already exposes rounded-*; these are aliases for clarity) ---------- */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-xl: 0.75rem; /* 12px */
+  --radius-2xl: 1rem; /* 16px */
+}
+
+/* =========================================================
+ * Base styles
+ * ========================================================= */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink-500);
+    background-color: var(--color-cream-100);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink-700);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  /* Default focus ring used everywhere we apply `focus-visible:`. */
+  :focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(66, 100, 86, 0.3);
+    border-radius: var(--radius-md);
+  }
+
+  /* Pointer cursor on every clickable thing — Chrome 121+ dropped this default. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a[href],
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background-color: var(--color-moss-100);
+    color: var(--color-ink-700);
+  }
+
+  /* Numerals everywhere look better with tabular figures inside counters. */
+  .font-mono,
+  code,
+  pre,
+  kbd {
+    font-feature-settings: "tnum", "ss01";
+  }
+}
+
