@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
-import { BriefMarkdown } from "@/components/ideas/brief-markdown";
-import { IdeaHeader } from "@/components/ideas/idea-header";
-import { UnlockCta } from "@/components/ideas/unlock-cta";
+import { LockedView } from "@/components/ideas/locked-view";
+import { RelatedBriefs } from "@/components/ideas/related-briefs";
+import { UnlockedView } from "@/components/ideas/unlocked-view";
 import { ApiError, apiGet } from "@/lib/api-client";
 import type { IdeaDetailResponse } from "@/lib/api/ideas";
 
@@ -56,60 +58,23 @@ export default async function IdeaDetailPage({ params }: Params) {
 
   return (
     <div className="bg-cream-100">
-      <main className="mx-auto max-w-3xl px-6 pb-24 pt-12">
-        <IdeaHeader idea={data.idea} />
+      <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-10">
+        <Link
+          href={"/feed" as Route}
+          className="mb-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 transition-colors hover:text-ink-500"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
+          Back to feed
+        </Link>
 
-        <div className="mt-10">
-          {data.access === "locked" ? (
-            <>
-              {data.free_preview_md ? (
-                <BriefMarkdown source={data.free_preview_md} />
-              ) : (
-                <p className="text-base text-ink-50">Preview coming soon.</p>
-              )}
-              <div className="mt-12">
-                <UnlockCta
-                  slug={data.idea.slug}
-                  unlockPriceCents={data.idea.unlock_price_cents}
-                  hiddenWordCount={data.locked_summary.hidden_word_count}
-                  hiddenSectionCount={data.locked_summary.hidden_section_count}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <UnlockedBanner
-                state={data.unlock_state?.state ?? null}
-                viaSubscription={data.unlock_state === null}
-              />
-              {data.brief_md ? <BriefMarkdown source={data.brief_md} /> : null}
-            </>
-          )}
-        </div>
+        {data.access === "locked" ? (
+          <LockedView data={data} />
+        ) : (
+          <UnlockedView data={data} />
+        )}
+
+        <RelatedBriefs items={data.related} />
       </main>
-    </div>
-  );
-}
-
-function UnlockedBanner({
-  state,
-  viaSubscription,
-}: {
-  state: string | null;
-  viaSubscription: boolean;
-}) {
-  let label: string;
-  if (viaSubscription) {
-    label = "Unlocked with Pro";
-  } else if (state === "unlocked") {
-    label = "You've unlocked this";
-  } else {
-    label = `State: ${state ?? "—"}`;
-  }
-  return (
-    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-moss-600/20 bg-moss-100 px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-moss-700">
-      <span className="h-2 w-2 rounded-full bg-moss-600" aria-hidden />
-      {label}
     </div>
   );
 }
