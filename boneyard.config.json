@@ -1,0 +1,17 @@
+{
+  "$schema": "https://boneyard.vercel.app/schema.json",
+  "url": "http://localhost:3000",
+  "routes": [
+    "/feed"
+  ],
+  "outDir": "bones",
+  "registryFile": "bones/registry.ts",
+  "breakpoints": [
+    { "name": "mobile", "width": 390 },
+    { "name": "desktop", "width": 1280 }
+  ],
+  "color": "#e2e3e0",
+  "darkColor": "#2a2c2a",
+  "animate": "pulse",
+  "wait": 1500
+}
