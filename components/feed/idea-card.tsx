@@ -9,6 +9,7 @@ import { ScoreBadge } from "@/components/feed/score-badge";
 import { Button } from "@/components/ui/button";
 import type { FeedIdea } from "@/lib/api/feed";
 import { useAuth } from "@/lib/auth-context";
+import { useMyUnlockedSlugs } from "@/lib/hooks/use-unlocked-slugs";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,18 @@ interface Props {
 export function IdeaCard({ idea, emphasised, unlocked }: Props) {
   const router = useRouter();
   const { user } = useAuth();
+  const { slugs: ownedSlugs, hasProAccess } = useMyUnlockedSlugs();
   const ideaPath = `/ideas/${idea.slug}` as Route;
+
+  // Pro users have implicit access to every idea but don't bump unlock_count
+  // until they explicitly claim. Show their access in the displayed count
+  // so it matches the "Unlocked" CTA on the right. NOTE we deliberately do
+  // NOT key off the `unlocked` prop here — that prop drives the CTA flip
+  // (and is true for every Pro user), but the *counter* should only add 1
+  // when the user is Pro AND hasn't yet shown up in the real count via a
+  // claim/payment. Building/shipped stay as-is — Pro doesn't auto-build.
+  const proImplicitUnlock = hasProAccess && !ownedSlugs.has(idea.slug);
+  const displayedUnlocks = idea.unlock_count + (proImplicitUnlock ? 1 : 0);
 
   const onUnlock = () => {
     if (!user) {
@@ -71,9 +83,20 @@ export function IdeaCard({ idea, emphasised, unlocked }: Props) {
       </Link>
 
       <footer className="flex flex-col gap-3 border-t border-cream-300 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm tabular-nums text-cream-400">
-          <span>
-            <span className="text-ink-500">{idea.unlock_count}</span> unlocked
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-sm tabular-nums text-cream-400">
+          <span
+            title={
+              proImplicitUnlock
+                ? "Includes your Pro access"
+                : undefined
+            }
+          >
+            <span className="text-ink-500">{displayedUnlocks}</span> unlocked
+            {proImplicitUnlock ? (
+              <span className="ml-1 text-[10px] uppercase tracking-wider text-moss-500">
+                · incl. you
+              </span>
+            ) : null}
           </span>
           <span>
             <span className="text-ink-500">{idea.building_count}</span> building

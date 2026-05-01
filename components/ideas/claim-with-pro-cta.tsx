@@ -6,18 +6,25 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api-client";
-import { claimIdeaWithPro } from "@/lib/api/ideas";
+import { claimIdeaWithPro, markUnlockBuilding } from "@/lib/api/ideas";
+import { invalidateUnlockedSlugs } from "@/lib/hooks/use-unlocked-slugs";
 
 interface Props {
   slug: string;
 }
 
 /**
- * Shown to Pro / Lifetime users who haven't yet claimed THIS idea. One click
- * creates the Unlock row and refreshes the page — after that they see the
- * standard state chips + action row + first-mover bonus + day counter.
+ * Shown to Pro / Lifetime users who haven't yet claimed THIS idea. The button
+ * labelled "I'm building this" chains TWO API calls in one click:
+ *   1. claim   — creates the unlock row (state="unlocked")
+ *   2. mark-building — flips state to "building"
  *
- * Renders in place of the StateChips + ActionRow on first view.
+ * Why combine: the button text is a commitment statement. If we only claimed,
+ * the user lands on the same page and sees "I'm building this" AGAIN on the
+ * action row, which is confusing — they think their click did nothing.
+ *
+ * The mark-building step is best-effort: if it fails for any reason, the claim
+ * still succeeded and the action row will let the user retry the transition.
  */
 export function ClaimWithProCta({ slug }: Props) {
   const router = useRouter();
@@ -30,7 +37,23 @@ export function ClaimWithProCta({ slug }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await claimIdeaWithPro(slug);
+      const result = await claimIdeaWithPro(slug);
+      // Pro user is committing to build — chain straight into mark-building
+      // so the next render shows the active building state, not another
+      // "I'm building this" button.
+      if (result.state === "unlocked") {
+        try {
+          await markUnlockBuilding(result.unlock_id);
+        } catch (mbErr) {
+          // Claim succeeded — don't surface this as a fatal error. The user
+          // will see the action row's button after refresh and can retry.
+          console.warn("claim succeeded but mark-building failed", mbErr);
+        }
+      }
+      // Bust the client-side unlocked-slugs cache so the next render of any
+      // feed card sees this slug as owned. Without this, the user navigates
+      // back to /feed and the card still says "Unlock $3" until a hard reload.
+      invalidateUnlockedSlugs();
       // Refresh server-rendered page so the unlocked-view sees the new
       // unlock_state and re-renders chips + action row.
       startTransition(() => router.refresh());
