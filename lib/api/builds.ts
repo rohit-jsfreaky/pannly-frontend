@@ -7,7 +7,7 @@
  * module-level dedup in lib/hooks/use-build-gallery.ts.
  */
 
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiPost } from "@/lib/api-client";
 
 // =================================================================== //
 //  Domain types — mirror schemas/builds.py                            //
@@ -102,3 +102,76 @@ export const fetchGallery = (query: GalleryQuery, signal?: AbortSignal) =>
 
 export const fetchBuildCategories = (signal?: AbortSignal) =>
   apiGet<CategoriesResponse>("/v1/builds/categories", { signal });
+
+// =================================================================== //
+//  Submission flow — /v1/unlocks/{id}/draft + /submit                  //
+// =================================================================== //
+
+export type BuildCategory = "SaaS" | "Tools" | "Content" | "Other";
+
+export const BUILD_CATEGORIES: BuildCategory[] = ["SaaS", "Tools", "Content", "Other"];
+
+export type UnlockDraftState =
+  | "pending"
+  | "unlocked"
+  | "building"
+  | "submitted"
+  | "approved"
+  | "refunded"
+  | "rejected";
+
+export interface DraftView {
+  unlock_id: string;
+  state: UnlockDraftState;
+  idea_slug: string;
+  idea_title: string;
+  idea_pain: string | null;
+  build_url: string | null;
+  build_screenshot_url: string | null;
+  build_writeup: string | null;
+  build_name: string | null;
+  build_category: BuildCategory | null;
+  submitted_at: string | null;
+  review_notes: string | null;
+}
+
+export interface DraftMutation {
+  build_url?: string | null;
+  build_screenshot_url?: string | null;
+  build_writeup?: string | null;
+  build_name?: string | null;
+  build_category?: BuildCategory | null;
+}
+
+export interface SubmitBuildBody {
+  build_url: string;
+  build_screenshot_url: string;
+  build_writeup?: string | null;
+  build_name?: string | null;
+  build_category?: BuildCategory | null;
+}
+
+export interface SubmitBuildResponse {
+  unlock_id: string;
+  state: UnlockDraftState;
+  submitted_at: string;
+  review_window_hours: number;
+}
+
+export const fetchDraft = (unlockId: string, init?: { cookieHeader?: string }) =>
+  apiGet<DraftView>(`/v1/unlocks/${encodeURIComponent(unlockId)}/draft`, {
+    headers: init?.cookieHeader ? { cookie: init.cookieHeader } : undefined,
+    next: { revalidate: 0 },
+  });
+
+export const saveDraft = (unlockId: string, body: DraftMutation) =>
+  apiPost<{ unlock_id: string; state: UnlockDraftState }>(
+    `/v1/unlocks/${encodeURIComponent(unlockId)}/draft`,
+    body,
+  );
+
+export const submitBuild = (unlockId: string, body: SubmitBuildBody) =>
+  apiPost<SubmitBuildResponse>(
+    `/v1/unlocks/${encodeURIComponent(unlockId)}/submit`,
+    body,
+  );

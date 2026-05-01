@@ -1,6 +1,8 @@
 "use client";
 
-import { Download, Hammer } from "lucide-react";
+import { Download, Hammer, Send } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -15,9 +17,10 @@ interface Props {
 }
 
 /**
- * Bottom of the unlocked header: "I'm building this" primary + "Download
- * brief PDF" secondary. The PDF link is a plain anchor — the browser carries
- * the auth cookie automatically.
+ * Bottom of the unlocked header: "I'm building this" / "Submit a build" /
+ * "Download brief PDF". The PDF link is a plain anchor — the browser carries
+ * the auth cookie automatically. The Submit link is a Next <Link>, so the
+ * router prefetches the form on hover.
  */
 export function ActionRow({ unlockId, state }: Props) {
   const router = useRouter();
@@ -26,7 +29,9 @@ export function ActionRow({ unlockId, state }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const canMarkBuilding = state === "unlocked";
+  const canSubmitBuild = state === "unlocked" || state === "building";
   const pdfUrl = `${env.apiBaseUrl}/v1/me/unlocks/${encodeURIComponent(unlockId)}/pdf`;
+  const submitHref = `/unlocks/${encodeURIComponent(unlockId)}/submit` as Route;
 
   const onMarkBuilding = async () => {
     if (!canMarkBuilding || busy) return;
@@ -43,12 +48,21 @@ export function ActionRow({ unlockId, state }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       {canMarkBuilding ? (
         <Button onClick={onMarkBuilding} loading={busy || isPending} size="lg">
           <Hammer className="h-4 w-4" strokeWidth={2} aria-hidden />
           I'm building this
         </Button>
+      ) : null}
+      {canSubmitBuild ? (
+        <Link
+          href={submitHref}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-moss-600 px-6 py-3 text-base font-medium text-cream-50 transition-opacity hover:opacity-90"
+        >
+          <Send className="h-4 w-4" strokeWidth={2} aria-hidden />
+          Submit a build
+        </Link>
       ) : null}
       <a
         href={pdfUrl}
