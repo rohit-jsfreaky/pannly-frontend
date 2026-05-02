@@ -116,7 +116,7 @@ export default function UnlockSuccessPage() {
               {unlock?.error_message ??
                 "Your card was declined or the transaction couldn't go through. No money was taken — try again?"}
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2"> 
               {unlock?.idea_slug ? (
                 <Button
                   onClick={() => router.replace(`/ideas/${unlock.idea_slug}` as Route)}

@@ -35,8 +35,8 @@ export function formatRelative(date: Date | string): string {
   return formatDate(d);
 }
 
-/** "Day 7 of 60" timer string for unlock cards. */
-export function formatBuildDay(unlockedAt: Date | string, windowDays = 60): string {
+/** "Day 7 of 30" timer string for unlock cards. */
+export function formatBuildDay(unlockedAt: Date | string, windowDays = 30): string {
   const start = typeof unlockedAt === "string" ? new Date(unlockedAt) : unlockedAt;
   const day = Math.min(
     windowDays,

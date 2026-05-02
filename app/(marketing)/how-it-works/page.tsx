@@ -66,7 +66,7 @@ export default function HowItWorksPage() {
         <HowItWorksStep
           number="05"
           title="You ship"
-          body="You have 60 days to build and launch. A working URL with a real signup counts — even just a landing page. The constraint forces focus, and auto-validation does the rest."
+          body="You have 30 days to build and launch. A working URL with a real signup counts — even just a landing page. The constraint forces focus, and auto-validation does the rest."
         >
           <ShipDiagram />
         </HowItWorksStep>

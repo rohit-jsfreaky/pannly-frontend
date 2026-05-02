@@ -70,7 +70,7 @@ export function ClaimWithProCta({ slug }: Props) {
         <h3 className="font-display text-lg text-moss-700">Claim this idea with Pro</h3>
       </div>
       <p className="mb-4 text-sm leading-relaxed text-ink-50">
-        You have full access via your Pro plan. Claim this idea to start your 60-day build window
+        You have full access via your Pro plan. Claim this idea to start your 30-day build window
         and join the builders working on it.
       </p>
       <Button onClick={onClaim} loading={busy} size="lg">

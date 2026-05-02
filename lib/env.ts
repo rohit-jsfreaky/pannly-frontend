@@ -29,6 +29,6 @@ export const env = {
     proMonthlyUsd: Number(process.env.NEXT_PUBLIC_PRO_PRICE_USD_MONTHLY ?? 15),
     unlockDefaultUsd: Number(process.env.NEXT_PUBLIC_UNLOCK_PRICE_USD_DEFAULT ?? 3),
     unlockPremiumUsd: Number(process.env.NEXT_PUBLIC_UNLOCK_PRICE_USD_PREMIUM ?? 5),
-    buildWindowDays: Number(process.env.NEXT_PUBLIC_BUILD_WINDOW_DAYS ?? 60),
+    buildWindowDays: Number(process.env.NEXT_PUBLIC_BUILD_WINDOW_DAYS ?? 30),
   },
 };

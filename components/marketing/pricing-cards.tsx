@@ -38,7 +38,7 @@ const plans: Plan[] = [
       { label: "Evidence quotes with source links" },
       { label: "Competitors, prices, where they're weak" },
       { label: "Sample landing copy + 3-step validation plan" },
-      { label: "Refunded if you ship within 60 days", emphasis: true },
+      { label: "Refunded if you ship within 30 days", emphasis: true },
     ],
     cta: { label: "Unlock your first idea", href: "/feed" },
     highlight: true,

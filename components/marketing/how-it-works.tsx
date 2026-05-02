@@ -18,7 +18,7 @@ const steps: Step[] = [
   {
     number: "03",
     title: "You ship",
-    body: "Launch your build within 60 days, submit the live URL, and your pledge is automatically refunded.",
+    body: "Launch your build within 30 days, submit the live URL, and your pledge is automatically refunded.",
   },
 ];
 

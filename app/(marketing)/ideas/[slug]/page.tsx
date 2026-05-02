@@ -1,12 +1,11 @@
 import type { Metadata, Route } from "next";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { LockedView } from "@/components/ideas/locked-view";
 import { RelatedBriefs } from "@/components/ideas/related-briefs";
 import { UnlockedView } from "@/components/ideas/unlocked-view";
+import { BackLink } from "@/components/ui/back-link";
 import { ApiError, apiGet } from "@/lib/api-client";
 import type { IdeaDetailResponse } from "@/lib/api/ideas";
 
@@ -59,13 +58,9 @@ export default async function IdeaDetailPage({ params }: Params) {
   return (
     <div className="bg-cream-100">
       <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-10">
-        <Link
-          href={"/feed" as Route}
-          className="mb-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 transition-colors hover:text-ink-500"
-        >
-          <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
-          Back to feed
-        </Link>
+        <div className="mb-8">
+          <BackLink fallbackHref={"/feed" as Route} label="Back" />
+        </div>
 
         {data.access === "locked" ? (
           <LockedView data={data} />

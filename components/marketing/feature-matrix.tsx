@@ -22,7 +22,7 @@ const rows: Row[] = [
     perUnlock: "Per unlock",
     pro: "Unlimited",
   },
-  { feature: "Refund-on-ship within 60 days", free: false, perUnlock: true, pro: true },
+  { feature: "Refund-on-ship within 30 days", free: false, perUnlock: true, pro: true },
   {
     feature: "First-mover bonus content",
     free: false,
