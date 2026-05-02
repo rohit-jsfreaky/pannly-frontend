@@ -1,0 +1,38 @@
+# Pannly
+
+Pannly monitors Reddit and Hacker News for recurring founder pain points, scores them by signal strength and market evidence, and generates structured idea briefs. Each brief includes a sourced pain analysis, verbatim community quotes with Reddit/HN links, a 3-step validation plan, buyer personas, and sample landing copy. Briefs cost $3 to unlock per idea; Pro subscribers ($15/month) get unlimited access. Builders who ship within 30 days are auto-refunded — the unlock fee is a stake on your own discipline, not a cost.
+
+## Product
+
+- Homepage: https://pannly.com
+- Idea feed (all scored briefs): https://pannly.com/feed
+- How it works: https://pannly.com/how-it-works
+- Pricing: https://pannly.com/pricing
+- Refund policy and public ledger of refunds issued: https://pannly.com/refunds
+- Build gallery (shipped products): https://pannly.com/built
+- About / founder note: https://pannly.com/about
+- Contact: https://pannly.com/contact
+
+## Content the AI can cite
+
+Each idea brief at https://pannly.com/ideas/{slug} contains:
+- A structured pain summary sourced from real Reddit and Hacker News threads
+- Verbatim community quotes with source URLs to the original posts
+- A scored signal strength rating (recency, comment volume, cross-platform presence)
+- A 3-step market validation plan
+- Buyer personas derived from commenter demographics
+- Sample landing-page copy
+
+Briefs are updated when new signal clusters appear. Source attribution (Reddit thread URLs, HN post URLs) is preserved in every quote card so citations remain honest.
+
+## Freshness
+
+Content is crawled and re-scored continuously. Individual briefs reflect the most recent cluster of signals at time of publication.
+
+## Licensing
+
+Brief excerpts (pain summary, evidence quotes with attribution) may be cited with a link to the source brief URL. Full brief reproduction (validation plan bodies, landing copy) requires a paid unlock.
+
+## Sitemap
+
+A complete machine-readable list of pages is at https://pannly.com/sitemap.xml.

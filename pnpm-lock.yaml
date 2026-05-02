@@ -63,6 +63,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.4
         version: 16.2.4(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+      png-to-ico:
+        specifier: ^3.0.1
+        version: 3.0.1
       postcss:
         specifier: ^8.4.0
         version: 8.5.12
@@ -72,6 +75,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.6.0
         version: 0.6.14(prettier@3.8.3)
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       tailwindcss:
         specifier: ^4.2.0
         version: 4.2.4
@@ -1884,6 +1890,15 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  png-to-ico@3.0.1:
+    resolution: {integrity: sha512-S8BOAoaGd9gT5uaemQ62arIY3Jzco7Uc7LwUTqRyqJDTsKqOAiyfyN4dSdT0D+Zf8XvgztgpRbM5wnQd7EgYwg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
+
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -2522,8 +2537,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.34.5':
     optionalDependencies:
@@ -4368,6 +4382,14 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
+  png-to-ico@3.0.1:
+    dependencies:
+      '@types/node': 22.19.17
+      minimist: 1.2.8
+      pngjs: 7.0.0
+
+  pngjs@7.0.0: {}
+
   possible-typed-array-names@1.1.0: {}
 
   postcss@8.4.31:
@@ -4568,7 +4590,6 @@ snapshots:
       '@img/sharp-win32-arm64': 0.34.5
       '@img/sharp-win32-ia32': 0.34.5
       '@img/sharp-win32-x64': 0.34.5
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:

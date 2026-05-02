@@ -21,31 +21,40 @@ export function EvidenceCards({ quotes, heading = "Evidence" }: Props) {
       <h2 className="mb-4 font-display text-2xl text-ink-700">{heading}</h2>
       <div className="space-y-4">
         {quotes.map((q, i) => (
-          <article
+          // <figure> wraps a <blockquote> + its <figcaption>/<cite>. This is
+          // the semantically correct pattern for "quoted passage with
+          // attribution", and Perplexity / Google AIO weight blockquoted
+          // content more heavily for citation than generic paragraphs.
+          <figure
             key={i}
             className="rounded-xl border border-cream-300 bg-cream-50 p-6"
           >
-            <p className="mb-4 text-base leading-relaxed text-ink-50">
+            <blockquote
+              {...(q.source_url ? { cite: q.source_url } : {})}
+              className="mb-4 text-base leading-relaxed text-ink-50"
+            >
               &ldquo;{q.quote}&rdquo;
-            </p>
-            <div className="flex items-center gap-3">
+            </blockquote>
+            <figcaption className="flex items-center gap-3">
               <Avatar label={q.author_label} />
               {q.source_url ? (
-                <a
-                  href={q.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 hover:text-ink-500"
-                >
-                  {q.author_label}
-                </a>
+                <cite className="not-italic">
+                  <a
+                    href={q.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 hover:text-ink-500"
+                  >
+                    {q.author_label}
+                  </a>
+                </cite>
               ) : (
-                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400">
+                <cite className="not-italic font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400">
                   {q.author_label}
-                </span>
+                </cite>
               )}
-            </div>
-          </article>
+            </figcaption>
+          </figure>
         ))}
       </div>
     </section>

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   title: "Pannly — Find an idea worth building. Get refunded if you actually ship.",
   description:
     "A curated archive of high-signal software ideas sourced from real business pain points. Unlock a brief, build the solution, and we return your pledge.",
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
 };
 
 export default function LandingPage() {

@@ -13,7 +13,13 @@
 import { apiGet, apiPost } from "@/lib/api-client";
 import type { FeedIdea, ScoreKind } from "@/lib/api/feed";
 
-export type AccessKind = "locked" | "unlocked";
+/**
+ * `bot_preview` is the AI-search-bot-only tier — backend detects known
+ * crawler user-agents and serves a citation-friendly slice of the full
+ * brief. The response shape is identical to "unlocked" but with empty
+ * validation-step descriptions and `landing_copy = null`.
+ */
+export type AccessKind = "locked" | "unlocked" | "bot_preview";
 
 export interface IdeaHeader {
   slug: string;
@@ -101,10 +107,16 @@ export interface LockedIdeaResponse {
 }
 
 export interface UnlockedIdeaResponse {
-  access: "unlocked";
+  /**
+   * `unlocked` for paid users / Pro subscribers; `bot_preview` for AI
+   * crawlers (same payload shape, but landing_copy is null and validation
+   * step descriptions are blank — backend strips them).
+   */
+  access: "unlocked" | "bot_preview";
   idea: IdeaHeader;
   brief: IdeaBrief;
-  /** Null when the user has access via an active Pro/Lifetime subscription. */
+  /** Null when the user has access via an active Pro/Lifetime subscription
+   *  OR when access is `bot_preview` (no per-user state for crawlers). */
   unlock_state: UnlockedState | null;
   builders: BuildersPanel;
   related: FeedIdea[];

@@ -10,6 +10,7 @@ const links: FooterLink[] = [
   { href: "/built", label: "Build Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/refunds", label: "Refunds" },
+  { href: "/contact", label: "Contact" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
 ];

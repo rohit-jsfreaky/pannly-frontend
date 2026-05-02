@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: "How it works",
   description:
     "From a Reddit complaint to a refunded build — the architectural process behind every Pannly brief.",
+  alternates: { canonical: "/how-it-works" },
+  openGraph: { url: "/how-it-works" },
 };
 
 export default function HowItWorksPage() {

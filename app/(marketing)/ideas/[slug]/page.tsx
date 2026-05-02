@@ -8,6 +8,7 @@ import { UnlockedView } from "@/components/ideas/unlocked-view";
 import { BackLink } from "@/components/ui/back-link";
 import { ApiError, apiGet } from "@/lib/api-client";
 import type { IdeaDetailResponse } from "@/lib/api/ideas";
+import { buildIdeaSchema, schemaJson } from "@/lib/seo/schemas";
 
 /**
  * Server-side fetch — forwards the browser's cookies so the backend can
@@ -44,9 +45,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const data = await fetchDetail(slug).catch(() => null);
   if (!data) return { title: "Idea not found" };
+  const canonical = `/ideas/${encodeURIComponent(slug)}`;
   return {
     title: data.idea.title,
     description: data.idea.one_line_pain ?? undefined,
+    alternates: { canonical },
+    openGraph: {
+      title: data.idea.title,
+      description: data.idea.one_line_pain ?? undefined,
+      url: canonical,
+      type: "article",
+    },
   };
 }
 
@@ -57,6 +66,23 @@ export default async function IdeaDetailPage({ params }: Params) {
 
   return (
     <div className="bg-cream-100">
+      {/* Per-idea JSON-LD: CreativeWork + Offer. Always emitted regardless of
+          locked/unlocked rendering — the brief exists, it's purchasable. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: schemaJson(
+            buildIdeaSchema({
+              slug: data.idea.slug,
+              title: data.idea.title,
+              one_line_pain: data.idea.one_line_pain,
+              tags: data.idea.tags,
+              first_published_at: data.idea.first_published_at,
+              unlock_price_cents: data.idea.unlock_price_cents,
+            }),
+          ),
+        }}
+      />
       <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-10">
         <div className="mb-8">
           <BackLink fallbackHref={"/feed" as Route} label="Back" />

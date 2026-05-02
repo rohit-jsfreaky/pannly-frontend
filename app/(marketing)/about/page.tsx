@@ -8,15 +8,29 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+import { buildAboutGraph, schemaJson } from "@/lib/seo/schemas";
+
 export const metadata: Metadata = {
   title: "About",
   description:
     "Why Pannly exists. The founder note, our scoring methodology, and how we build in public.",
+  alternates: { canonical: "/about" },
+  openGraph: { url: "/about" },
 };
+
+const ABOUT_GRAPH = buildAboutGraph({
+  founderName: "Rohit",
+  founderJobTitle: "Founder",
+  founderLocation: "India",
+});
 
 export default function AboutPage() {
   return (
     <div className="px-6 md:px-12 w-full px-6 py-16 md:px-8 md:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(ABOUT_GRAPH) }}
+      />
       <Header />
       <FounderNote />
       <Methodology />

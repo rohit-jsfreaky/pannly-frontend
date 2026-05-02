@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Feed",
   description:
     "Pain points from real builders, scored, briefed, and ready to unlock for $3.",
+  alternates: { canonical: "/feed" },
+  openGraph: { url: "/feed" },
 };
 
 /**
