@@ -61,12 +61,23 @@ export function UserMenu({ user }: { user: CurrentUser }) {
         aria-haspopup="menu"
         className="flex items-center gap-2 rounded-full border border-cream-300 bg-cream-50 py-1 pl-1 pr-3 transition-colors hover:bg-cream-200"
       >
-        <span
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-moss-600 font-display text-sm font-semibold text-cream-50"
-          aria-hidden
-        >
-          {initial}
-        </span>
+        {user.avatar_url ? (
+          // Plain <img> — avatar URLs are R2 public CDN, change rarely, and
+          // we don't need Next/image optimisation for a 28×28 pixel square.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.avatar_url}
+            alt=""
+            className="h-7 w-7 rounded-full object-cover"
+          />
+        ) : (
+          <span
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-moss-600 font-display text-sm font-semibold text-cream-50"
+            aria-hidden
+          >
+            {initial}
+          </span>
+        )}
         <ChevronDown className="h-4 w-4 text-ink-50/70" strokeWidth={1.75} aria-hidden />
       </button>
 

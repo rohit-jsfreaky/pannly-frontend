@@ -16,6 +16,8 @@ export interface CurrentUser {
   id: string;
   email: string;
   display_name: string | null;
+  /** Public R2 URL of the user's avatar; null = no custom avatar (UI shows initial). */
+  avatar_url: string | null;
   is_pro: boolean;
   is_admin: boolean;
   email_verified: boolean;

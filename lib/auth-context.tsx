@@ -43,6 +43,12 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<CurrentUser>;
   /** Manually push a user (used by signupComplete, forgotPasswordReset). */
   setUser: (user: CurrentUser | null) => void;
+  /**
+   * Patch the current user with a partial. Used for surgical updates after a
+   * profile save — the server returns only the fields that changed; we splice
+   * them in without a /v1/auth/me refetch. No-op if no user is signed in.
+   */
+  updateUser: (patch: Partial<CurrentUser>) => void;
   /** Server-side logout + clear context. */
   logout: () => Promise<void>;
 }
@@ -65,6 +71,10 @@ export function AuthProvider({
   const setUser = useCallback((next: CurrentUser | null) => {
     setUserState(next);
     setStatus(next ? "authenticated" : "unauthenticated");
+  }, []);
+
+  const updateUser = useCallback((patch: Partial<CurrentUser>) => {
+    setUserState((cur) => (cur ? { ...cur, ...patch } : cur));
   }, []);
 
   const refresh = useCallback(async (): Promise<CurrentUser | null> => {
@@ -115,9 +125,10 @@ export function AuthProvider({
       refresh,
       login: doLogin,
       setUser,
+      updateUser,
       logout: doLogout,
     }),
-    [user, status, refresh, doLogin, setUser, doLogout],
+    [user, status, refresh, doLogin, setUser, updateUser, doLogout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

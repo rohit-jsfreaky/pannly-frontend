@@ -39,6 +39,11 @@ export const presignScreenshot = (contentType: string, unlockId?: string) =>
     unlock_id: unlockId ?? null,
   });
 
+export const presignAvatar = (contentType: string) =>
+  apiPost<PresignResponse>("/v1/uploads/avatar/presign", {
+    content_type: contentType,
+  });
+
 /**
  * PUT a file to R2 using a presigned URL. Sends the file as the request body
  * with the `Content-Type` header from the presign response (this header is

@@ -4,18 +4,18 @@ Pannly monitors Reddit and Hacker News for recurring founder pain points, scores
 
 ## Product
 
-- Homepage: https://pannly.com
-- Idea feed (all scored briefs): https://pannly.com/feed
-- How it works: https://pannly.com/how-it-works
-- Pricing: https://pannly.com/pricing
-- Refund policy and public ledger of refunds issued: https://pannly.com/refunds
-- Build gallery (shipped products): https://pannly.com/built
-- About / founder note: https://pannly.com/about
-- Contact: https://pannly.com/contact
+- Homepage: https://pannly.getrevlio.com
+- Idea feed (all scored briefs): https://pannly.getrevlio.com/feed
+- How it works: https://pannly.getrevlio.com/how-it-works
+- Pricing: https://pannly.getrevlio.com/pricing
+- Refund policy and public ledger of refunds issued: https://pannly.getrevlio.com/refunds
+- Build gallery (shipped products): https://pannly.getrevlio.com/built
+- About / founder note: https://pannly.getrevlio.com/about
+- Contact: https://pannly.getrevlio.com/contact
 
 ## Content the AI can cite
 
-Each idea brief at https://pannly.com/ideas/{slug} contains:
+Each idea brief at https://pannly.getrevlio.com/ideas/{slug} contains:
 - A structured pain summary sourced from real Reddit and Hacker News threads
 - Verbatim community quotes with source URLs to the original posts
 - A scored signal strength rating (recency, comment volume, cross-platform presence)
@@ -35,4 +35,4 @@ Brief excerpts (pain summary, evidence quotes with attribution) may be cited wit
 
 ## Sitemap
 
-A complete machine-readable list of pages is at https://pannly.com/sitemap.xml.
+A complete machine-readable list of pages is at https://pannly.getrevlio.com/sitemap.xml.

@@ -3,7 +3,7 @@
  * Mirrors docs/api/me.md and docs/api/payments.md.
  */
 
-import { apiGet } from "@/lib/api-client";
+import { api, apiGet, apiPost } from "@/lib/api-client";
 
 // =================================================================== //
 //  /v1/me/dashboard — 4-tile stats strip + tab counts                 //
@@ -196,3 +196,42 @@ export interface LastCheckoutResponse {
 
 export const getLastCheckout = (signal?: AbortSignal) =>
   apiGet<LastCheckoutResponse>("/v1/me/last-checkout", { signal });
+
+// =================================================================== //
+//  /v1/me/profile  +  /v1/me/password                                  //
+// =================================================================== //
+
+export interface UpdateProfileBody {
+  /** Omit to leave unchanged. The schema rejects empty strings. */
+  display_name?: string;
+  /**
+   * Sentinel: omit to leave unchanged, pass `null` to clear, pass an R2
+   * URL (from /v1/uploads/avatar/presign) to set. The backend distinguishes
+   * "omitted" from "explicit null" and will only touch the column when the
+   * key is present in the request body.
+   */
+  avatar_url?: string | null;
+}
+
+export interface UpdateProfileResponse {
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+/**
+ * PATCH semantics — JSON.stringify drops `undefined` keys, so omitting an
+ * optional field on the input object means "don't change". Passing `null`
+ * for `avatar_url` means "clear it". Don't send `display_name: null` (the
+ * backend doesn't allow clearing the display name).
+ */
+export const updateProfile = (body: UpdateProfileBody) =>
+  api<UpdateProfileResponse>("/v1/me/profile", { method: "PATCH", body });
+
+export interface ChangePasswordBody {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export const changePassword = (body: ChangePasswordBody) =>
+  apiPost<{ updated: boolean }>("/v1/me/password", body);
