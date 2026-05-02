@@ -6,11 +6,12 @@ import { Wordmark } from "@/components/brand/wordmark";
 type FooterLink = { href: Route | string; label: string; external?: boolean };
 
 const links: FooterLink[] = [
-  { href: "/about", label: "Manifesto" },
-  { href: "/built", label: "Library" },
+  { href: "/about", label: "About" },
+  { href: "/built", label: "Build Gallery" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/refunds", label: "Refunds" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
-  { href: "https://x.com/pannly", label: "Twitter", external: true },
 ];
 
 export function SiteFooter() {

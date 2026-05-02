@@ -40,10 +40,6 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: env.appBaseUrl,
   },
-  twitter: {
-    card: "summary_large_image",
-    creator: "@pannly",
-  },
   robots: {
     index: true,
     follow: true,

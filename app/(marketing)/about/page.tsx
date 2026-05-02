@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
 import {
   Activity,
@@ -167,12 +167,10 @@ function BuildInPublicBand() {
         posted publicly. No vanity metrics, no hustle theatre.
       </p>
       <Link
-        href="https://x.com/pannly"
-        target="_blank"
-        rel="noopener noreferrer"
+        href={"/refunds" as Route}
         className="inline-flex items-center gap-2 rounded-xl bg-moss-600 px-6 py-3 text-sm text-cream-50 transition-opacity hover:opacity-90"
       >
-        Follow along on X
+        See the refund ledger
         <ArrowRight className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
       </Link>
     </section>

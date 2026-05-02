@@ -5,7 +5,7 @@ type Cell = ReactNode | "check" | "dash";
 
 interface Row {
   feature: string;
-  cells: [Cell, Cell, Cell]; // free / a-la-carte / artisan
+  cells: [Cell, Cell, Cell]; // Free / Per Unlock / Pro
 }
 
 const ROWS: Row[] = [
@@ -47,13 +47,13 @@ export function FeatureMatrix() {
                 Feature
               </th>
               <th className="w-[22%] py-4 text-center font-display text-xl text-ink-700">
-                Explorer
+                Free
               </th>
               <th className="w-[22%] py-4 text-center font-display text-xl text-ink-700">
-                A La Carte
+                Per Unlock
               </th>
               <th className="w-[22%] py-4 text-center font-display text-xl text-ink-700">
-                Artisan
+                Pro
               </th>
             </tr>
           </thead>

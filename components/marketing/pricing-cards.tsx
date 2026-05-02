@@ -29,7 +29,7 @@ const plans: Plan[] = [
     cta: { label: "Sign up free", href: "/login" },
   },
   {
-    name: "Per-unlock",
+    name: "Per Unlock",
     blurb: "Pay only when an idea matters. Refunded if you actually ship.",
     price: "$3",
     unit: "/ per idea",

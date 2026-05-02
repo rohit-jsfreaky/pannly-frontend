@@ -10,7 +10,7 @@ const FAQ: FaqItem[] = [
       "If you purchase a brief and launch a product based directly on it within 6 months, send us the link. We'll refund the cost of the brief. We want to subsidize action, not just reading.",
   },
   {
-    question: "Can I upgrade from A La Carte to Artisan?",
+    question: "Can I upgrade from Per Unlock to Pro?",
     answer:
       "Yes, anytime. If you've purchased more than three briefs in a single month, we automatically suggest upgrading as it becomes more cost-effective.",
   },

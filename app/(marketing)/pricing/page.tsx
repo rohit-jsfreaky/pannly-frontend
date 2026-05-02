@@ -70,17 +70,17 @@ export default function PricingPage() {
       <section className="mx-auto max-w-7xl px-6 pb-24">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <PricingCard
-            name="Explorer"
-            blurb="For those gathering inspiration and early signals."
+            name="Free"
+            blurb="Browse the feed and see what's trending. No card required."
             price="$0"
             unit="/ forever"
             features={[
-              { label: "Browse public archives" },
+              { label: "Browse the public feed" },
               { label: "3 daily idea previews" },
               { label: "Basic trend signals" },
             ]}
             cta={{
-              label: user ? "Browse the feed" : "Start exploring",
+              label: user ? "Browse the feed" : "Get started",
               onClick: () => router.push((user ? "/feed" : "/signup") as Route),
             }}
           />
@@ -88,8 +88,8 @@ export default function PricingPage() {
           <PricingCard
             highlighted
             badge="Most Popular"
-            name="A La Carte"
-            blurb="Purchase detailed briefs only when you need them."
+            name="Per Unlock"
+            blurb="Pay for detailed briefs only when you need them."
             price={`$${unlockPrice}`}
             unit="/ per brief"
             features={[
@@ -104,8 +104,8 @@ export default function PricingPage() {
           />
 
           <PricingCard
-            name="Artisan"
-            blurb="For serial builders who require constant input."
+            name="Pro"
+            blurb="For serial builders who want unlimited access."
             price={`$${proMonthly}`}
             unit="/ month"
             features={[

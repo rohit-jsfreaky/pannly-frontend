@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const links: { href: Route; label: string }[] = [
   { href: "/feed", label: "Ideas" },
   { href: "/built", label: "Build Gallery" },
-  { href: "/refunds", label: "Archive" },
+  { href: "/refunds", label: "Refunds" },
   { href: "/pricing", label: "Pricing" },
 ];
 
