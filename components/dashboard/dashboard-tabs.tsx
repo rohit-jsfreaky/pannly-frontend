@@ -18,7 +18,10 @@ const TABS: { id: UnlockTab; label: string }[] = [
 
 export function DashboardTabs({ active, counts, onChange }: Props) {
   return (
-    <div role="tablist" className="mb-8 flex gap-8 border-b border-cream-300/60">
+    <div
+      role="tablist"
+      className="mb-8 flex gap-5 overflow-x-auto border-b border-cream-300/60 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-8 md:overflow-visible"
+    >
       {TABS.map((t) => {
         const count = counts ? counts[t.id] : null;
         const isActive = t.id === active;
@@ -30,7 +33,7 @@ export function DashboardTabs({ active, counts, onChange }: Props) {
             aria-selected={isActive}
             onClick={() => onChange(t.id)}
             className={cn(
-              "-mb-px flex items-center gap-2 border-b-2 pb-3 text-base font-medium transition-colors",
+              "-mb-px flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 pb-3 text-base font-medium transition-colors",
               isActive
                 ? "border-moss-600 text-moss-700"
                 : "border-transparent text-ink-50 hover:text-ink-700",

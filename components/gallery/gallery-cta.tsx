@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 export function GalleryCta() {
   const router = useRouter();
   return (
-    <section className="mx-auto mt-12 w-5xl rounded-xl border border-cream-300/60 bg-cream-200 px-8 py-16 text-center shadow-soft">
+    <section className="mx-auto mt-12 w-full max-w-5xl rounded-xl border border-cream-300/60 bg-cream-200 px-6 py-12 text-center shadow-soft md:px-8 md:py-16">
       <h2 className="mb-8 font-display text-3xl text-ink-700">Want yours up here?</h2>
       <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Button
