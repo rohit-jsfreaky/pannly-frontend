@@ -1,5 +1,13 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import type { Metadata } from "next";
+
+import { RefundsView } from "@/components/refunds/refunds-view";
+
+export const metadata: Metadata = {
+  title: "Refunds · Pannly",
+  description:
+    "Public ledger of every refund Pannly has issued. Auto-refunds for builders who ship within 30 days.",
+};
 
 export default function Page() {
-  return <PlaceholderPage route="/refunds" phase="Phase 4.5" />;
+  return <RefundsView />;
 }
