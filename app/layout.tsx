@@ -74,6 +74,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Google Search Console site-verification meta tag. Renders site-wide as
+  // <meta name="google-site-verification" content="..."> and stays valid as
+  // long as it's served from any URL on the verified property.
+  verification: {
+    google: "b6f7c2enVZ4-58O3JBgrGgON1pqkkd_RCIXRngee2M4",
+  },
 };
 
 // `themeColor` lives on the Viewport export in Next 14+ — the metadata API
