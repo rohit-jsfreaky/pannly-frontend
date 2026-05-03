@@ -3,13 +3,32 @@
  * Server-only env reads happen inline; this file is browser-safe.
  */
 
+const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * Resolve a public env var, with TWO different rules depending on environment:
+ *   - dev:  use `value` if set, else `fallback` (so localhost just works)
+ *   - prod: use `value` if set AND not pointing at localhost, else THROW
+ *
+ * The localhost guard is intentional. Without it, forgetting to set
+ * NEXT_PUBLIC_APP_BASE_URL on Coolify silently ships a build whose canonical
+ * URLs, OG image URLs, sitemap entries, and JSON-LD ids all point at
+ * `http://localhost:3000` — Google indexes nothing, social previews break.
+ */
 const required = (name: string, value: string | undefined, fallback?: string): string => {
+  if (isProd) {
+    if (!value || !value.length) {
+      throw new Error(`Missing required env var: ${name}`);
+    }
+    if (value.includes("localhost") || value.includes("127.0.0.1")) {
+      throw new Error(
+        `${name} points at ${value} in production — set the real domain on Coolify.`,
+      );
+    }
+    return value;
+  }
   if (value && value.length) return value;
   if (fallback !== undefined) return fallback;
-  // We only error in production; dev gets a soft default to keep things moving.
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(`Missing required env var: ${name}`);
-  }
   return "";
 };
 

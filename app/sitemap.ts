@@ -16,7 +16,6 @@
 
 import type { MetadataRoute } from "next";
 
-import { fetchGallery, type GalleryBuild } from "@/lib/api/builds";
 import { fetchFeed, type FeedIdea } from "@/lib/api/feed";
 import { env } from "@/lib/env";
 
@@ -24,7 +23,7 @@ import { env } from "@/lib/env";
 // freshness, and pulling N pages from the backend on every robot hit is wasteful.
 export const revalidate = 3600;
 
-// 48 is the per_page max enforced by both /v1/feed and /v1/builds.
+// 48 is the per_page max enforced by /v1/feed.
 const PER_PAGE = 48;
 const MAX_PAGES = 5;
 
@@ -49,10 +48,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = env.appBaseUrl.replace(/\/+$/, "");
   const now = new Date();
 
-  const [ideaUrls, buildUrls] = await Promise.all([
-    safeFetchAllIdeas(),
-    safeFetchAllBuilds(),
-  ]);
+  // NOTE: per-build pages (/built/[slug]) are deliberately NOT enumerated yet —
+  // that route is a Phase 4.4 placeholder. Adding it back when the page is
+  // implemented is one map() call away.
+  const ideaUrls = await safeFetchAllIdeas();
 
   return [
     ...STATIC_ROUTES.map((r) => ({
@@ -68,16 +67,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : now,
       changeFrequency: "weekly" as const,
       priority: 0.8,
-    })),
-    ...buildUrls.map((build) => ({
-      url: `${base}/built/${encodeURIComponent(build.idea_slug)}`,
-      lastModified: build.refunded_at
-        ? new Date(build.refunded_at)
-        : build.submitted_at
-          ? new Date(build.submitted_at)
-          : now,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
     })),
   ];
 }
@@ -96,19 +85,6 @@ async function safeFetchAllIdeas(): Promise<FeedIdea[]> {
     );
   } catch {
     // Backend down — the static routes still render a valid sitemap.
-    return [];
-  }
-}
-
-async function safeFetchAllBuilds(): Promise<GalleryBuild[]> {
-  try {
-    return await fetchAllPaginated((page) =>
-      fetchGallery({ page, per_page: PER_PAGE }).then((r) => ({
-        items: r.items,
-        has_next: r.pagination.has_next,
-      })),
-    );
-  } catch {
     return [];
   }
 }

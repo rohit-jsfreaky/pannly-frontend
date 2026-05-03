@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api-client";
 import { startIdeaUnlock } from "@/lib/api/checkout";
 import { useAuth } from "@/lib/auth-context";
+import { env } from "@/lib/env";
 import { formatMoney } from "@/lib/format";
 
 interface Props {
@@ -43,7 +44,19 @@ export function UnlockCta({
     setLoading(true);
     setError(null);
     try {
-      const res = await startIdeaUnlock(slug);
+      // Pass return / cancel URLs explicitly so the post-checkout flow
+      // doesn't silently depend on the backend's defaults.
+      //   return_url  — /billing?confirming=1 mirrors the Pro/Lifetime
+      //                 flow and reuses the existing CheckoutConfirming
+      //                 banner that polls /v1/me/last-checkout. Works for
+      //                 every payment kind because it keys off `status`.
+      //   cancel_url  — drops the user back on the same idea brief, where
+      //                 the locked variant still renders so they can try
+      //                 again or click "Get unlimited with Pro" instead.
+      const res = await startIdeaUnlock(slug, {
+        return_url: `${env.appBaseUrl}/billing?confirming=1`,
+        cancel_url: `${env.appBaseUrl}/ideas/${slug}`,
+      });
       if (res.checkout_url) {
         window.location.href = res.checkout_url;
       } else {
