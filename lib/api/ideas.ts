@@ -68,11 +68,23 @@ export interface LockedSummary {
   hidden_word_count: number;
   hidden_section_count: number;
   visible_section_count: number;
+  /** Human-readable titles of sections behind the paywall — drives the
+   *  "what's inside" bullet list on the unlock card. */
+  hidden_section_titles: string[];
 }
 
 export interface LockedBriefPreview {
+  /** Server-truncated 2-sentence teaser. The full pain never reaches a
+   *  locked client. */
   pain_md: string | null;
+  /** @deprecated Always null since the pain-cap rollout. The locked tier
+   *  no longer ships actual quote text — use evidence_count + sources. */
   evidence_preview: EvidenceQuote | null;
+  /** How many evidence quotes are inside the unlocked brief. */
+  evidence_count: number;
+  /** Distinct host names of evidence sources (e.g. ["reddit.com",
+   *  "news.ycombinator.com"]). Order = first-seen. */
+  evidence_sources: string[];
 }
 
 export interface UnlockedState {

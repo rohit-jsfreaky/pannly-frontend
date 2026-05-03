@@ -1,12 +1,11 @@
 "use client";
 
 import type { Route } from "next";
-import { Crown, Lock } from "lucide-react";
+import { CheckCircle2, Crown, Lock, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CountersStrip } from "@/components/ideas/counters-strip";
-import { EvidenceCards } from "@/components/ideas/evidence-cards";
 import { PainSection } from "@/components/ideas/pain-section";
 import { TagsRow } from "@/components/ideas/tags-row";
 import { ScoreBadge } from "@/components/feed/score-badge";
@@ -21,16 +20,20 @@ interface Props {
   data: LockedIdeaResponse;
 }
 
+const FIRST_MOVER_THRESHOLD = 10;
+
 /**
- * Locked variant — same content shape as unlocked, but truncated:
- *   - Pain section is fully visible (it's the hook)
- *   - One evidence quote teaser
- *   - Then the fade-into-paywall pattern, no validation plan / landing copy /
- *     buyer personas leaked
+ * Locked variant — surface only what's needed to convince someone the idea
+ * is real, never enough to act on it without paying.
  *
- * Both CTAs (Unlock + Pro) trigger checkouts via the same auth-aware path:
- *   - logged out → /login?next=/ideas/{slug}
- *   - logged in  → POST checkout endpoint, hard-redirect to checkout_url
+ * Backend-enforced cap: `preview.pain_md` is a 2-sentence teaser. Evidence
+ * quote text never reaches the wire — we get a count + distinct host names.
+ *
+ * Visual flow:
+ *   - header (tags / score / title / one-line pain / counters / CTAs)
+ *   - capped pain teaser
+ *   - "what's inside the brief" panel = source-count line + named hidden
+ *     sections + the unlock CTAs
  */
 export function LockedView({ data }: Props) {
   const router = useRouter();
@@ -72,7 +75,7 @@ export function LockedView({ data }: Props) {
     router.push("/pricing" as Route);
   };
 
-  const previewQuotes = preview.evidence_preview ? [preview.evidence_preview] : [];
+  const firstMoverSlotsLeft = Math.max(FIRST_MOVER_THRESHOLD - idea.unlock_count, 0);
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -118,79 +121,123 @@ export function LockedView({ data }: Props) {
         ) : null}
       </header>
 
-      {/* Free pain section is fully visible — it's the hook. */}
+      {/* Pain teaser. Already capped server-side to ~40 words ending in "…". */}
       <section className="mb-12">
         <PainSection pain={preview.pain_md} />
       </section>
 
-      {/* Locked evidence section + overlay paywall card. The card is absolutely
-          positioned over the fade so the user reads the teaser quote, sees the
-          fade, then lands on the paywall — exactly the design's flow. */}
-      <div className="relative border-t border-cream-300 pt-8">
-        <section className="space-y-6">
-          <EvidenceCards quotes={previewQuotes} heading="Evidence & Market Signals" />
-          {/* Faded teaser paragraph — hints there's more market analysis below. */}
-          <p className="px-1 text-base leading-relaxed text-ink-50 opacity-60">
-            Furthermore, looking at the search volume for adjacent terms and the
-            comment activity in the original thread, there is a clear upward
-            trend indicating that existing tools are…
-          </p>
-        </section>
-
-        {/* Soft cream fade — eats the bottom of the teaser paragraph. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[420px] bg-gradient-to-t from-cream-100 via-cream-100/95 to-transparent"
-        />
-
-        {/* Paywall card sits on top of the fade. */}
-        <div className="relative z-20 mt-[-160px] flex justify-center pb-8">
-          <PaywallCard
-            locked={locked_summary}
-            unlockPriceCents={idea.unlock_price_cents}
-            unlocking={unlocking}
-            onUnlock={onUnlock}
-            onPro={onPro}
-          />
-        </div>
-
-        {/* Spacer so the absolutely-positioned fade doesn't overflow into
-            anything below (e.g. the related-rail rendered by the page). */}
-        <div className="h-12" />
-      </div>
+      {/* Inside the brief — single panel, no fade trick. We are NOT showing a
+          fake "more here" preview anymore — the user reads the teaser, then
+          this panel sells what's behind the wall. */}
+      <UnlockPanel
+        evidenceCount={preview.evidence_count}
+        evidenceSources={preview.evidence_sources}
+        hiddenTitles={locked_summary.hidden_section_titles}
+        firstMoverSlotsLeft={firstMoverSlotsLeft}
+        unlockPriceCents={idea.unlock_price_cents}
+        unlocking={unlocking}
+        onUnlock={onUnlock}
+        onPro={onPro}
+      />
     </article>
   );
 }
 
-interface PaywallProps {
-  locked: LockedIdeaResponse["locked_summary"];
+// =================================================================== //
+//  Unlock panel                                                        //
+// =================================================================== //
+
+interface PanelProps {
+  evidenceCount: number;
+  evidenceSources: string[];
+  hiddenTitles: string[];
+  firstMoverSlotsLeft: number;
   unlockPriceCents: number;
   unlocking: boolean;
   onUnlock: () => void;
   onPro: () => void;
 }
 
-function PaywallCard({ locked, unlockPriceCents, unlocking, onUnlock, onPro }: PaywallProps) {
+function UnlockPanel({
+  evidenceCount,
+  evidenceSources,
+  hiddenTitles,
+  firstMoverSlotsLeft,
+  unlockPriceCents,
+  unlocking,
+  onUnlock,
+  onPro,
+}: PanelProps) {
   return (
-    <div className="w-full max-w-md rounded-xl border border-cream-300 bg-cream-50 p-8 text-center shadow-soft">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-moss-100">
-        <Lock className="h-5 w-5 text-moss-600" strokeWidth={2} aria-hidden />
-      </div>
-      <h3 className="mb-3 font-display text-2xl text-ink-700">Unlock the rest of this brief.</h3>
-      <p className="mb-6 px-2 text-sm text-ink-50">
-        Access the full market analysis, targeted buyer profiles, the 3-step
-        validation plan, and a ready-to-ship landing-page copy block.
-      </p>
-      <div className="mb-6 flex items-center justify-center gap-2 border-y border-cream-300/60 py-3 font-mono text-xs uppercase tracking-wider text-cream-400">
-        <span className="tabular-nums text-ink-50">
-          {locked.hidden_word_count.toLocaleString()} words
+    <section
+      aria-labelledby="unlock-panel-heading"
+      className="rounded-2xl border border-cream-300 bg-cream-50 p-8 shadow-soft md:p-12"
+    >
+      <div className="mb-6 flex items-start gap-3">
+        <span
+          aria-hidden
+          className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-moss-100"
+        >
+          <Lock className="h-4 w-4 text-moss-600" strokeWidth={2} />
         </span>
-        <span>·</span>
-        <span className="tabular-nums text-ink-50">
-          {locked.hidden_section_count} sections hidden
-        </span>
+        <div>
+          <h2 id="unlock-panel-heading" className="font-display text-3xl text-ink-700">
+            What's inside the brief.
+          </h2>
+          <p className="mt-2 text-base leading-relaxed text-ink-50">
+            The pain above is the teaser. Everything below is what you stake $3 to read.
+          </p>
+        </div>
       </div>
-      <div className="flex flex-col gap-3">
+
+      {/* Source-count line — the proof becomes a metric, not text you can read for free. */}
+      {evidenceCount > 0 ? (
+        <p className="mb-6 rounded-lg border border-cream-300 bg-cream-100/60 px-4 py-3 text-sm text-ink-500">
+          <span className="font-mono font-semibold text-moss-700">
+            {evidenceCount}
+          </span>{" "}
+          evidence quote{evidenceCount === 1 ? "" : "s"} with source URLs
+          {evidenceSources.length > 0 ? (
+            <>
+              {" "}
+              from{" "}
+              <span className="font-mono text-ink-700">
+                {evidenceSources.join(", ")}
+              </span>
+            </>
+          ) : null}
+          .
+        </p>
+      ) : null}
+
+      {/* Named hidden sections — desire builder, not a generic "4 sections hidden". */}
+      {hiddenTitles.length > 0 ? (
+        <ul className="mb-8 space-y-3">
+          {hiddenTitles.map((title) => (
+            <li key={title} className="flex items-start gap-3 text-base leading-snug text-ink-700">
+              <CheckCircle2
+                className="mt-0.5 h-5 w-5 shrink-0 text-moss-600"
+                strokeWidth={2}
+                aria-hidden
+              />
+              <span>{title}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {/* First-mover scarcity — only render when slots actually exist. */}
+      {firstMoverSlotsLeft > 0 ? (
+        <div className="mb-6 flex items-center gap-2 rounded-md border border-plum-300 bg-plum-100/40 px-3 py-2">
+          <Sparkles className="h-4 w-4 text-plum-700" strokeWidth={2} aria-hidden />
+          <p className="font-mono text-xs uppercase tracking-wider text-plum-700">
+            <span className="tabular-nums">{firstMoverSlotsLeft}</span> first-mover slot
+            {firstMoverSlotsLeft === 1 ? "" : "s"} left · bonus material included
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Button block size="lg" loading={unlocking} onClick={onUnlock}>
           Unlock for {formatMoney(unlockPriceCents)}
         </Button>
@@ -198,6 +245,6 @@ function PaywallCard({ locked, unlockPriceCents, unlocking, onUnlock, onPro }: P
           Get unlimited with Pro
         </Button>
       </div>
-    </div>
+    </section>
   );
 }
