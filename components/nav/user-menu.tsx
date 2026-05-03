@@ -108,12 +108,12 @@ export function UserMenu({ user }: { user: CurrentUser }) {
             {user.is_admin ? (
               <li>
                 <Link
-                  href={"/admin/unlocks" as Route}
+                  href={"/admin" as Route}
                   className="block px-4 py-2 text-sm text-plum-500 hover:bg-cream-200"
                   onClick={() => setOpen(false)}
                   role="menuitem"
                 >
-                  Admin queue
+                  Admin
                 </Link>
               </li>
             ) : null}

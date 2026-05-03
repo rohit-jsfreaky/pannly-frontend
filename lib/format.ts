@@ -1,12 +1,20 @@
 /** Tiny formatting helpers used across screens. Locale-aware where it matters. */
 
-export function formatMoney(cents: number, currency: "USD" | "INR" = "USD"): string {
+export function formatMoney(cents: number, currency: string = "USD"): string {
   const amount = cents / 100;
-  return new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-  }).format(amount);
+  // Coerce to a known ISO code; fall back to USD if Postgres ever has junk.
+  const code = currency?.toUpperCase() || "USD";
+  const locale = code === "INR" ? "en-IN" : "en-US";
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount);
+  } catch {
+    // Bad currency code → ascii dollar fallback so we never throw at render.
+    return `$${amount.toFixed(2)}`;
+  }
 }
 
 export function formatCount(n: number): string {
