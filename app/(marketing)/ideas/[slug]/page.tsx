@@ -8,7 +8,11 @@ import { UnlockedView } from "@/components/ideas/unlocked-view";
 import { BackLink } from "@/components/ui/back-link";
 import { ApiError, apiGet } from "@/lib/api-client";
 import type { IdeaDetailResponse } from "@/lib/api/ideas";
-import { buildIdeaSchema, schemaJson } from "@/lib/seo/schemas";
+import {
+  buildBreadcrumbSchema,
+  buildIdeaSchema,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
 /**
  * Server-side fetch — forwards the browser's cookies so the backend can
@@ -26,10 +30,17 @@ async function fetchDetail(slug: string): Promise<IdeaDetailResponse | null> {
   } catch {
     /* not in a request — fine, anonymous fetch */
   }
+  // For ANONYMOUS callers we cache for 5 minutes — the locked variant is
+  // identical for every logged-out visitor, and the public counters tolerate
+  // 5 min of staleness. For LOGGED-IN callers we still bypass the cache
+  // because the response is per-user (unlock state, days remaining, first-
+  // mover rank). Without this split, every render hits FastAPI which is
+  // wasteful for the marketing surface that gets the most crawler traffic.
+  const isAnon = !cookieHeader;
   try {
     return await apiGet<IdeaDetailResponse>(`/v1/ideas/${encodeURIComponent(slug)}`, {
       headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-      next: { revalidate: 0 },
+      next: { revalidate: isAnon ? 300 : 0 },
     });
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
@@ -46,15 +57,27 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const data = await fetchDetail(slug).catch(() => null);
   if (!data) return { title: "Idea not found" };
   const canonical = `/ideas/${encodeURIComponent(slug)}`;
+  // one_line_pain is intentionally short and meta-safe (full pain is server-
+  // capped). It's the right text for description, OG, and Twitter alike.
+  const description = data.idea.one_line_pain ?? data.idea.title;
   return {
     title: data.idea.title,
-    description: data.idea.one_line_pain ?? undefined,
+    description,
     alternates: { canonical },
     openGraph: {
       title: data.idea.title,
-      description: data.idea.one_line_pain ?? undefined,
+      description,
       url: canonical,
       type: "article",
+      images: [
+        { url: "/og-default.png", width: 1200, height: 630, alt: data.idea.title },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: data.idea.title,
+      description,
+      images: ["/og-default.png"],
     },
   };
 }
@@ -63,6 +86,17 @@ export default async function IdeaDetailPage({ params }: Params) {
   const { slug } = await params;
   const data = await fetchDetail(slug);
   if (!data) notFound();
+
+  // Title can be very long for an SEO-friendly slug — clamp the breadcrumb
+  // text so the SERP rich-result line doesn't overflow.
+  const breadcrumbTitle =
+    data.idea.title.length > 60
+      ? `${data.idea.title.slice(0, 57)}…`
+      : data.idea.title;
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Feed", path: "/feed" },
+    { name: breadcrumbTitle, path: `/ideas/${encodeURIComponent(data.idea.slug)}` },
+  ]);
 
   return (
     <div className="bg-cream-100">
@@ -82,6 +116,10 @@ export default async function IdeaDetailPage({ params }: Params) {
             }),
           ),
         }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(breadcrumbSchema) }}
       />
       <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-10">
         <div className="mb-8">

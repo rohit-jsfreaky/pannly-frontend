@@ -1,15 +1,27 @@
-import type { Metadata } from "next";
-
 import { env } from "@/lib/env";
-import { buildPricingGraph, schemaJson } from "@/lib/seo/schemas";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import {
+  buildBreadcrumbSchema,
+  buildPricingGraph,
+  buildSpeakableWebPage,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Pricing",
+  path: "/pricing",
   description:
     "Free to browse. $3 per idea unlock — refunded automatically when you ship within 30 days. Or $15/mo Pro for unlimited briefs.",
-  alternates: { canonical: "/pricing" },
-  openGraph: { url: "/pricing" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([{ name: "Pricing", path: "/pricing" }]);
+
+const SPEAKABLE = buildSpeakableWebPage({
+  url: "/pricing",
+  name: "Pannly Pricing — $3 per unlock, refunded on ship",
+  description:
+    "Pannly charges $3 to unlock a single idea brief. Builders who ship a working product within 30 days are automatically refunded — the unlock fee functions as a 30-day commitment stake, not a subscription.",
+});
 
 /**
  * Pricing layout exists for two reasons:
@@ -33,6 +45,14 @@ export default function PricingLayout({ children }: { children: React.ReactNode 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(graph) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(SPEAKABLE) }}
       />
       {children}
     </>

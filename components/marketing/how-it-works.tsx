@@ -4,21 +4,24 @@ interface Step {
   body: string;
 }
 
+// H2 titles are deliberately self-contained so AI Overviews / voice agents
+// can cite a single heading and the meaning survives — verb-only headings
+// like "We listen" lose their object outside context.
 const steps: Step[] = [
   {
     number: "01",
-    title: "We listen",
-    body: "We crawl Reddit and Hacker News every 30 minutes, then synthesise real operational pain into actionable software briefs.",
+    title: "We crawl Reddit and Hacker News every 30 minutes for recurring pain signals",
+    body: "Six SaaS-focused subreddits and the Ask HN / Show HN feeds, refreshed continuously and synthesised into actionable software briefs.",
   },
   {
     number: "02",
-    title: "You unlock",
-    body: "Pay a small pledge to view the full brief, evidence, competitors, sample landing copy, and distribution plan.",
+    title: "You unlock the full brief for $3",
+    body: "Pay a small pledge to view the full brief — pain analysis, evidence, competitors, sample landing copy, and a 3-step validation plan.",
   },
   {
     number: "03",
-    title: "You ship",
-    body: "Launch your build within 30 days, submit the live URL, and your pledge is automatically refunded.",
+    title: "You ship within 30 days and your $3 is refunded automatically",
+    body: "Launch your build within 30 days, submit the live URL, an admin reviews within 24–48 hours, and your pledge is auto-credited back to your card.",
   },
 ];
 

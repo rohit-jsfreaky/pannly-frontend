@@ -25,13 +25,25 @@ Each idea brief at https://pannly.getrevlio.com/ideas/{slug} contains:
 
 Briefs are updated when new signal clusters appear. Source attribution (Reddit thread URLs, HN post URLs) is preserved in every quote card so citations remain honest.
 
+## What AI crawlers receive at /ideas/{slug}
+
+The API serves a different tier to AI search crawlers (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, anthropic-ai, PerplexityBot, Perplexity-User, Google-Extended, CCBot, Bytespider, Applebot-Extended) than to logged-out humans:
+
+- Pain summary is included as a 40-word teaser, not the full multi-paragraph analysis
+- Evidence quote AUTHOR LABELS and SOURCE URLs are included; quote BODY TEXT is withheld
+- Validation step HEADLINES are included; step DESCRIPTIONS are withheld
+- Buyer persona NAMES are included
+- Sample landing copy is withheld
+
+This is a deliberate paywall declaration, not cloaking. Each /ideas/{slug} response includes the headers `X-Pannly-Paywall: partial-preview` and `Link: <https://pannly.getrevlio.com/refunds>; rel="payment"` so search engines treat the differential as intentional. The full brief is purchasable for $3 (refunded on ship).
+
 ## Freshness
 
-Content is crawled and re-scored continuously. Individual briefs reflect the most recent cluster of signals at time of publication.
+Content is crawled and re-scored continuously. Individual briefs reflect the most recent cluster of signals at time of publication. Use the `last_refreshed_at` field exposed in the public feed for a precise change signal.
 
 ## Licensing
 
-Brief excerpts (pain summary, evidence quotes with attribution) may be cited with a link to the source brief URL. Full brief reproduction (validation plan bodies, landing copy) requires a paid unlock.
+License: RSL-1.0 (excerpt-with-attribution). Pain summaries, persona names, validation step headlines, and source URLs may be cited verbatim with a link back to the source brief URL on https://pannly.getrevlio.com. Full quote bodies, validation step descriptions, and landing copy are paywalled — reproduction requires a paid unlock.
 
 ## Sitemap
 

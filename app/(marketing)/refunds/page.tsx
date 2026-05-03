@@ -1,16 +1,20 @@
-import type { Metadata } from "next";
-
 import { RefundsView } from "@/components/refunds/refunds-view";
 import { fetchRefundsSummary, type RefundsSummary } from "@/lib/api/refunds";
-import { buildRefundsDataset, schemaJson } from "@/lib/seo/schemas";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import {
+  buildBreadcrumbSchema,
+  buildRefundsDataset,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
-  title: "Refunds · Pannly",
+export const metadata = pageMetadata({
+  title: "Refunds",
+  path: "/refunds",
   description:
     "Public ledger of every refund Pannly has issued. Auto-refunds for builders who ship within 30 days.",
-  alternates: { canonical: "/refunds" },
-  openGraph: { url: "/refunds" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([{ name: "Refunds", path: "/refunds" }]);
 
 /**
  * /refunds — public refund transparency. Server-side we fetch the summary
@@ -36,6 +40,10 @@ export default async function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(dataset) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
       />
       <RefundsView />
     </>

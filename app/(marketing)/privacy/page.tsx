@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
-
 import { LegalPage } from "@/components/legal/legal-page";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { buildBreadcrumbSchema, schemaJson } from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Privacy Policy",
+  path: "/privacy",
   description:
     "What data Pannly collects, how we use it, who we share it with, and your rights.",
-  alternates: { canonical: "/privacy" },
-  openGraph: { url: "/privacy" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([
+  { name: "Privacy Policy", path: "/privacy" },
+]);
 
 /**
  * /privacy — Privacy Policy.
@@ -26,6 +29,11 @@ export const metadata: Metadata = {
  */
 export default function PrivacyPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
     <LegalPage
       title="Privacy Policy"
       lastUpdated="May 3, 2026"
@@ -318,5 +326,6 @@ export default function PrivacyPage() {
         <a href="mailto:support@getrevlio.com">support@getrevlio.com</a>.
       </p>
     </LegalPage>
+    </>
   );
 }

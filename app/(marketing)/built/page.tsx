@@ -1,17 +1,24 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { GalleryView } from "@/components/gallery/gallery-view";
 import { fetchGallery, type GalleryBuild } from "@/lib/api/builds";
-import { buildGalleryGraph, schemaJson } from "@/lib/seo/schemas";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import {
+  buildBreadcrumbSchema,
+  buildGalleryGraph,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Build Gallery",
+  path: "/built",
   description:
     "Real builders shipping real products from $3 idea unlocks — every project here got a refund.",
-  alternates: { canonical: "/built" },
-  openGraph: { url: "/built" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([
+  { name: "Build Gallery", path: "/built" },
+]);
 
 /**
  * /built — public Build Gallery. Auth-free; everything renders for anon users.
@@ -39,6 +46,10 @@ export default async function BuildGalleryPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(graph) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
       />
       <Suspense fallback={null}>
         <GalleryView />

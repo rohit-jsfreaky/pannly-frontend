@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
-
 import { LegalPage } from "@/components/legal/legal-page";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { buildBreadcrumbSchema, schemaJson } from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Terms of Service",
+  path: "/terms",
   description:
     "The terms that govern your use of Pannly — accounts, pricing, refunds, content, and how disputes work.",
-  alternates: { canonical: "/terms" },
-  openGraph: { url: "/terms" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([
+  { name: "Terms of Service", path: "/terms" },
+]);
 
 /**
  * /terms — Terms of Service.
@@ -20,6 +23,11 @@ export const metadata: Metadata = {
  */
 export default function TermsPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
     <LegalPage
       title="Terms of Service"
       lastUpdated="May 3, 2026"
@@ -269,5 +277,6 @@ export default function TermsPage() {
         <a href="mailto:support@getrevlio.com">support@getrevlio.com</a>.
       </p>
     </LegalPage>
+    </>
   );
 }

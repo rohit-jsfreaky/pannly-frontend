@@ -1,20 +1,28 @@
-import type { Metadata } from "next";
 import { MessageSquare, Lock, Infinity as InfinityIcon } from "lucide-react";
 
 import { HowItWorksStep } from "@/components/marketing/how-it-works-step";
 import { TrustStrip } from "@/components/marketing/trust-strip";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { buildBreadcrumbSchema, schemaJson } from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "How it works",
+  path: "/how-it-works",
   description:
     "From a Reddit complaint to a refunded build — the architectural process behind every Pannly brief.",
-  alternates: { canonical: "/how-it-works" },
-  openGraph: { url: "/how-it-works" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([
+  { name: "How it works", path: "/how-it-works" },
+]);
 
 export default function HowItWorksPage() {
   return (
     <div className="px-6 md:px-12 flex flex-col gap-16 py-12 md:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
       {/* Hero */}
       <section className="max-w-4xl pb-8 pt-12">
         <h1 className="mb-6 font-display text-4xl font-medium tracking-tight text-moss-600 md:text-5xl">
@@ -27,57 +35,53 @@ export default function HowItWorksPage() {
         </p>
       </section>
 
+      {/* Step H2s are written self-contained so AI Overviews can cite a single
+          heading and the meaning survives outside context. */}
       <div className="flex flex-col border-t border-cream-300">
-        {/* Step 1 — We listen */}
         <HowItWorksStep
           number="01"
-          title="We listen"
-          body="Every 30 minutes we crawl r/SaaS, r/indiehackers, r/Entrepreneur, r/SideProject, r/microsaas, r/SaaS_Ideas, plus Ask HN and Show HN. We don't look for ideas — we look for recurring complaints, workarounds, and 'why isn't there a…' moments."
+          title="We crawl Reddit and Hacker News every 30 minutes for recurring pain signals"
+          body="Six SaaS-focused subreddits (r/SaaS, r/indiehackers, r/Entrepreneur, r/SideProject, r/microsaas, r/SaaS_Ideas) plus Ask HN and Show HN. We don't look for ideas — we look for recurring complaints, workarounds, and 'why isn't there a…' moments."
         >
           <ListenDiagram />
         </HowItWorksStep>
 
-        {/* Step 2 — We score */}
         <HowItWorksStep
           number="02"
-          title="We score"
+          title="We score each signal cluster by demand, buyer reachability, and competitive gap"
           body="Every raw signal goes through three scores: how strong the demand is, how reachable the buyer is, and how weak the existing competition is. The weighted total is what you see on each idea card."
         >
           <ScoreDiagram />
         </HowItWorksStep>
 
-        {/* Step 3 — We write */}
         <HowItWorksStep
           number="03"
-          title="We write"
-          body="Each brief is a clinical document: the pain itself, 3–5 quoted excerpts as evidence, the persona who buys it, existing competitors and their prices, the wedge they're missing, sample landing copy, a 3-step validation plan, and distribution channels."
+          title="We write a structured brief — pain, evidence, personas, validation plan, landing copy"
+          body="Each brief is a clinical document: the pain itself, evidence quotes with source URLs, the persona who buys it, a 3-step validation plan, and sample landing-page copy you can paste into Framer."
         >
           <WriteDiagram />
         </HowItWorksStep>
 
-        {/* Step 4 — You unlock */}
         <HowItWorksStep
           number="04"
-          title="You unlock"
+          title="You unlock the full brief for $3, or go Pro for unlimited at $15/month"
           body="Pay $3 to unlock a single brief, or subscribe to Pro for $15/mo and unlock anything in the archive. No hard sell — most users start with one brief, and upgrade when they hit five in a month."
         >
           <UnlockDiagram />
         </HowItWorksStep>
 
-        {/* Step 5 — You ship */}
         <HowItWorksStep
           number="05"
-          title="You ship"
-          body="You have 30 days to build and launch. A working URL with a real signup counts — even just a landing page. The constraint forces focus, and auto-validation does the rest."
+          title="You ship within 30 days — a working URL with a real signup counts"
+          body="A working URL plus a screenshot showing the core functionality. We reject 'coming soon' pages and sites behind login walls. The 30-day constraint forces focus."
         >
           <ShipDiagram />
         </HowItWorksStep>
 
-        {/* Step 6 — We refund */}
         <HowItWorksStep
           number="06"
-          title="We refund"
-          body="Submit the live URL on your dashboard. If it passes auto-validation (real domain, registered after unlock, real content), we refund the $3 to your original card via Dodo within 7 days, and your build lands in the public gallery."
+          title="An admin reviews within 24–48 hours and your $3 returns to your card"
+          body="Submit the live URL on your dashboard. An admin reviews within 24–48 hours; on approval, the $3 refund clears via Dodo to your original card within 7 days, and your build lands in the public gallery."
           isLast
         >
           <RefundDiagram />
@@ -217,8 +221,8 @@ function UnlockDiagram() {
 function ShipDiagram() {
   const points = [
     { label: "Day 0: Unlock", state: "filled" as const },
-    { label: "Day 30: Build", state: "outlined" as const },
-    { label: "Day 60: Ship", state: "tertiary" as const },
+    { label: "Day 1–28: Build", state: "outlined" as const },
+    { label: "Day 30: Ship", state: "tertiary" as const },
   ];
 
   return (

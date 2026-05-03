@@ -26,6 +26,9 @@ export interface FeedIdea {
   shipped_count: number;
   unlock_price_cents: number;
   first_published_at: string | null;
+  /** When the brief was last regenerated (re-clustered or re-scored).
+   *  Drives the sitemap `<lastmod>` for /ideas/{slug}. */
+  last_refreshed_at?: string | null;
 }
 
 export interface Pagination {

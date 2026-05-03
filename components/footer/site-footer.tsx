@@ -7,6 +7,7 @@ type FooterLink = { href: Route | string; label: string; external?: boolean };
 
 const links: FooterLink[] = [
   { href: "/about", label: "About" },
+  { href: "/how-it-works", label: "How it works" },
   { href: "/built", label: "Build Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/refunds", label: "Refunds" },

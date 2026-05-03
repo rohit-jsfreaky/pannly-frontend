@@ -24,10 +24,19 @@ export function Hero() {
             actually ship.
           </h1>
 
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-50">
-            Pannly watches Reddit and Hacker News for the recurring "I'd pay
-            for this" posts. We score, brief, and price each idea at $3 —
-            refunded automatically the moment you launch.
+          {/* Definitional one-sentence paragraph for AI Overviews / voice
+              extraction. The .geo-speakable class is referenced by the
+              SpeakableSpecification JSON-LD on the homepage. */}
+          <p className="geo-speakable mt-6 max-w-2xl text-lg leading-relaxed text-ink-50">
+            Pannly is a startup idea finder that surfaces validated software
+            opportunities from real Reddit and Hacker News pain threads,
+            priced at $3 per brief with an automatic refund if you ship within
+            30 days.
+          </p>
+
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-50">
+            We watch Reddit and Hacker News for the recurring "I'd pay for
+            this" posts, score each one, and write the brief.
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">

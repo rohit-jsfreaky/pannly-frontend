@@ -60,7 +60,15 @@ export default function PricingPage() {
         <h1 className="mb-6 font-display text-5xl font-semibold tracking-tight text-ink-700 md:text-6xl">
           Three ways to use Pannly
         </h1>
-        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-ink-50">
+        {/* Definitional paragraph for AI Overviews extraction. The
+            .geo-speakable class is referenced by the SpeakableSpecification
+            JSON-LD on the pricing page. */}
+        <p className="geo-speakable mx-auto max-w-2xl text-lg leading-relaxed text-ink-500">
+          Pannly charges $3 to unlock a single idea brief. Builders who ship a
+          working product within 30 days are automatically refunded — the
+          unlock fee functions as a 30-day commitment stake, not a subscription.
+        </p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-ink-50">
           Whether you're exploring your first idea or shipping your tenth product, we have a
           model that respects your craftsmanship.
         </p>

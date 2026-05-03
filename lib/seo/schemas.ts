@@ -34,9 +34,11 @@ export function buildOrganizationGraph(): OrganizationGraph {
         url: BASE,
         logo: {
           "@type": "ImageObject",
-          url: `${BASE}/og-default.png`,
-          width: 1200,
-          height: 630,
+          // Square asset is required for Knowledge Panel logo eligibility.
+          // /icon-512.png is shipped from public/.
+          url: `${BASE}/icon-512.png`,
+          width: 512,
+          height: 512,
         },
         description:
           "Pannly watches Reddit and Hacker News for real founder pain. We score the signals, write the brief, and let you unlock one for $3 — refunded the moment you ship.",
@@ -45,7 +47,8 @@ export function buildOrganizationGraph(): OrganizationGraph {
           name: "Rohit",
           jobTitle: "Founder",
         },
-        sameAs: [],
+        // sameAs intentionally omitted until external profiles exist; an empty
+        // array is a wasted signal.
       },
       {
         "@type": "WebSite",
@@ -146,6 +149,13 @@ export function buildPricingGraph(input: PricingSchemaInput) {
           "Unlock a single founder pain-point brief. Full PDF teardown, evidence quotes, competitor matrix, validation plan, and landing copy. Refunded automatically when you ship within 30 days.",
         url: pricingUrl,
         brand: { "@type": "Brand", name: "Pannly" },
+        // Image is required by Google for Product rich-result eligibility.
+        image: {
+          "@type": "ImageObject",
+          url: `${BASE}/og-default.png`,
+          width: 1200,
+          height: 630,
+        },
         offers: {
           "@type": "Offer",
           price: input.unlockUsd.toFixed(2),
@@ -168,6 +178,12 @@ export function buildPricingGraph(input: PricingSchemaInput) {
           "Unlimited idea brief access, early drops, and private builder community. Cancel anytime.",
         url: pricingUrl,
         brand: { "@type": "Brand", name: "Pannly" },
+        image: {
+          "@type": "ImageObject",
+          url: `${BASE}/og-default.png`,
+          width: 1200,
+          height: 630,
+        },
         offers: {
           "@type": "Offer",
           price: input.proMonthlyUsd.toFixed(2),
@@ -349,6 +365,72 @@ export function buildRefundsDataset(input: RefundsDatasetInput) {
       "@type": "DataDownload",
       contentUrl: `${BASE}/v1/refunds/ledger`,
       encodingFormat: "application/json",
+    },
+  };
+}
+
+// =================================================================== //
+//  BreadcrumbList — every interior page                                //
+// =================================================================== //
+
+export interface Breadcrumb {
+  /** Visible label, e.g. "Pricing". */
+  name: string;
+  /** Site-relative path, e.g. "/pricing". The helper prepends BASE. */
+  path: string;
+}
+
+/**
+ * BreadcrumbList is one of the few schema types that still triggers a Google
+ * rich result (the breadcrumb trail above the SERP title) for any site
+ * category. Cheap to add, valuable on every interior page.
+ *
+ * Pass an array of crumbs from the home root onward — the helper handles the
+ * "Home" entry implicitly so callers stay terse.
+ */
+export function buildBreadcrumbSchema(crumbs: Breadcrumb[]) {
+  const trail: Breadcrumb[] = [{ name: "Home", path: "/" }, ...crumbs];
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((crumb, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: crumb.name,
+      item: `${BASE}${crumb.path === "/" ? "" : crumb.path}`,
+    })),
+  };
+}
+
+// =================================================================== //
+//  SpeakableSpecification — voice / AI summarisation                   //
+// =================================================================== //
+
+/**
+ * Marks the strongest definitional content on a page as the preferred passage
+ * for voice assistants and AI Overviews. Wrap the matching DOM nodes with
+ * `className="geo-speakable"` for the second selector to apply.
+ *
+ * Returns a `WebPage` schema rather than just the SpeakableSpecification
+ * fragment because Google requires Speakable to live inside a WebPage entity.
+ */
+export function buildSpeakableWebPage(input: {
+  url: string;
+  name: string;
+  description: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE}${input.url}#webpage`,
+    url: `${BASE}${input.url}`,
+    name: input.name,
+    description: input.description,
+    isPartOf: { "@id": SITE_ID },
+    inLanguage: "en-US",
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", ".geo-speakable"],
     },
   };
 }

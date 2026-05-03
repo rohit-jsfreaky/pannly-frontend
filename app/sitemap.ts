@@ -1,17 +1,24 @@
 /**
  * /sitemap.xml — generated dynamically.
  *
- * Static marketing routes are listed by hand. Idea briefs and shipped builds
- * are pulled live from the FastAPI backend via the existing public list
- * endpoints (`/v1/feed`, `/v1/builds`). We paginate each up to 5 pages × 48
- * items = 240 URLs per surface, which is plenty for the foreseeable future.
+ * Static marketing routes are listed by hand. Idea briefs are pulled live from
+ * the FastAPI backend via the existing public list endpoint (`/v1/feed`),
+ * paginated up to 5 pages × 48 items = 240 URLs.
  *
  * Failure mode: if the backend is unreachable, we still return the static
  * routes — the sitemap stays valid, idea/build URLs just won't be enumerated
  * until the next regeneration. Don't throw; SEO infra should never 500.
  *
- * Cached in the framework via `revalidate = 3600` — a fresh fetch happens at
- * most once per hour even with high crawl volume.
+ * Cached in the framework via `revalidate = 3600`.
+ *
+ * Design notes:
+ *   - `changefreq` and `priority` are NOT emitted — Google ignores both per
+ *     their public docs. Slimmer payload, fewer misleading signals.
+ *   - Pages that don't actually change daily get a pinned `lastmod`. Routes
+ *     that are genuinely dynamic (`/`, `/feed`, `/built`, `/refunds`) keep
+ *     a build-time timestamp.
+ *   - Idea pages prefer `last_refreshed_at` (clustering re-score) over
+ *     `first_published_at` so Googlebot recrawls when content changes.
  */
 
 import type { MetadataRoute } from "next";
@@ -19,29 +26,34 @@ import type { MetadataRoute } from "next";
 import { fetchFeed, type FeedIdea } from "@/lib/api/feed";
 import { env } from "@/lib/env";
 
-// Re-validate the sitemap once an hour. Crawlers don't need second-by-second
-// freshness, and pulling N pages from the backend on every robot hit is wasteful.
 export const revalidate = 3600;
 
-// 48 is the per_page max enforced by /v1/feed.
-const PER_PAGE = 48;
+const PER_PAGE = 48; // Backend caps at 50 — keep <= 50.
 const MAX_PAGES = 5;
 
 interface StaticRoute {
   path: string;
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
-  priority: number;
+  /** ISO date string when the page itself last meaningfully changed. Omit for
+   *  routes whose content updates whenever the underlying data updates (those
+   *  fall back to the build-time timestamp). */
+  lastmod?: string;
 }
 
+// `lastmod` pinned to the date copy was last edited. Bump these when you ship
+// a real content change to the page (not just a layout tweak).
+const STATIC_PINNED = "2026-05-01";
+
 const STATIC_ROUTES: StaticRoute[] = [
-  { path: "/", changeFrequency: "daily", priority: 1.0 },
-  { path: "/feed", changeFrequency: "daily", priority: 0.9 },
-  { path: "/built", changeFrequency: "daily", priority: 0.8 },
-  { path: "/refunds", changeFrequency: "weekly", priority: 0.7 },
-  { path: "/pricing", changeFrequency: "monthly", priority: 0.7 },
-  { path: "/how-it-works", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/about", changeFrequency: "monthly", priority: 0.5 },
-  { path: "/contact", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/" },                        // homepage — content shifts with live numbers
+  { path: "/feed" },                    // feed — fresh ideas, dynamic
+  { path: "/built" },                   // gallery — dynamic
+  { path: "/refunds" },                 // ledger — dynamic
+  { path: "/pricing",      lastmod: STATIC_PINNED },
+  { path: "/how-it-works", lastmod: STATIC_PINNED },
+  { path: "/about",        lastmod: STATIC_PINNED },
+  { path: "/contact",      lastmod: STATIC_PINNED },
+  { path: "/privacy",      lastmod: STATIC_PINNED },
+  { path: "/terms",        lastmod: STATIC_PINNED },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -56,17 +68,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...STATIC_ROUTES.map((r) => ({
       url: `${base}${r.path}`,
-      lastModified: now,
-      changeFrequency: r.changeFrequency,
-      priority: r.priority,
+      lastModified: r.lastmod ? new Date(r.lastmod) : now,
     })),
     ...ideaUrls.map((idea) => ({
       url: `${base}/ideas/${encodeURIComponent(idea.slug)}`,
-      lastModified: idea.first_published_at
-        ? new Date(idea.first_published_at)
-        : now,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
+      lastModified: idea.last_refreshed_at
+        ? new Date(idea.last_refreshed_at)
+        : idea.first_published_at
+          ? new Date(idea.first_published_at)
+          : now,
     })),
   ];
 }

@@ -34,6 +34,19 @@ let inflightSidebar:
   | Promise<readonly [PopularTagsResponse, FeedTopicsResponse]>
   | null = null;
 
+/**
+ * Server-rendered pages can call this once on mount to seed the module-level
+ * cache so the client never has to refetch sidebar data the SSR already knew.
+ * Safe to call multiple times — the first call wins, subsequent calls are no-ops.
+ */
+export function seedSidebarCache(
+  popular: PopularTagsResponse | null,
+  topics: FeedTopicsResponse | null,
+): void {
+  if (popular && !cachedPopular) cachedPopular = popular;
+  if (topics && !cachedTopics) cachedTopics = topics;
+}
+
 function ensureSidebar(): Promise<
   readonly [PopularTagsResponse, FeedTopicsResponse]
 > {
@@ -84,18 +97,41 @@ function ensureFeed(query: FeedQuery): Promise<FeedResponse> {
  * - Last successful response stays rendered while the next one loads, so
  *   the skeleton only shows on the very first request.
  */
-export function useFeed(query: FeedQuery): {
+/**
+ * Optional `initialData` lets the parent Server Component pre-fetch the
+ * default-params feed and pass it in. The hook seeds the first render with
+ * that data and skips the initial network call IF the query matches what was
+ * pre-fetched. Any subsequent filter/page change still triggers a fresh
+ * fetch as before.
+ *
+ * `initialKey` is the JSON-encoded query that produced `initialData`. If
+ * the hook's current `query` differs (the user landed with URL search params),
+ * we ignore the seed and fetch normally — first paint will show a skeleton.
+ */
+export function useFeed(
+  query: FeedQuery,
+  initialData?: FeedResponse | null,
+  initialKey?: string,
+): {
   data: FeedResponse | null;
   loading: boolean;
   error: string | null;
 } {
-  const [data, setData] = useState<FeedResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const key = JSON.stringify(query);
+  const seedMatches = initialData != null && initialKey === key;
+  const [data, setData] = useState<FeedResponse | null>(seedMatches ? initialData : null);
+  const [loading, setLoading] = useState(!seedMatches);
+  const [error, setError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    // First render with matching seed: skip the initial network call. We
+    // still mark hydrated so future query changes refetch normally.
+    if (!hydrated && seedMatches) {
+      setHydrated(true);
+      return;
+    }
     setLoading(true);
     setError(null);
     ensureFeed(query)
@@ -103,6 +139,7 @@ export function useFeed(query: FeedQuery): {
         if (cancelled) return;
         setData(res);
         setLoading(false);
+        setHydrated(true);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -110,6 +147,7 @@ export function useFeed(query: FeedQuery): {
         else if (err instanceof Error) setError(err.message);
         else setError("Couldn't load the feed.");
         setLoading(false);
+        setHydrated(true);
       });
     return () => {
       cancelled = true;

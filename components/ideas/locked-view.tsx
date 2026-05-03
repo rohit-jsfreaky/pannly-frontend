@@ -1,7 +1,7 @@
 "use client";
 
 import type { Route } from "next";
-import { CheckCircle2, Crown, Lock, Sparkles } from "lucide-react";
+import { CheckCircle2, Lock, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -97,18 +97,54 @@ export function LockedView({ data }: Props) {
           unlocked={idea.unlock_count}
           building={idea.building_count}
           shipped={idea.shipped_count}
-          className="mb-8"
+          className="mb-3"
         />
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button onClick={onUnlock} loading={unlocking} size="lg">
+        {/* Counter interpretation — only render when there's a story to tell.
+            If shipped > 0, the completion-rate framing is more persuasive than
+            the raw numbers above. Otherwise we surface the staked-money line
+            so the indie hacker reads the counters as commitment, not vanity. */}
+        {idea.shipped_count > 0 ? (
+          <p className="mb-8 text-sm leading-relaxed text-ink-50">
+            <span className="font-mono tabular-nums text-ink-700">
+              {idea.unlock_count}
+            </span>{" "}
+            people staked{" "}
+            <span className="font-mono tabular-nums">
+              {formatMoney(idea.unlock_price_cents)}
+            </span>{" "}
+            on this.{" "}
+            <span className="font-mono tabular-nums text-moss-700">
+              {idea.shipped_count}
+            </span>{" "}
+            shipped and got refunded.
+          </p>
+        ) : idea.unlock_count > 0 ? (
+          <p className="mb-8 text-sm leading-relaxed text-ink-50">
+            <span className="font-mono tabular-nums text-ink-700">
+              {idea.unlock_count}
+            </span>{" "}
+            {idea.unlock_count === 1 ? "person has" : "people have"} staked{" "}
+            <span className="font-mono tabular-nums">
+              {formatMoney(idea.unlock_price_cents)}
+            </span>{" "}
+            on this so far.
+          </p>
+        ) : (
+          <div className="mb-8" />
+        )}
+
+        {/* Single primary action above the teaser. The Pro alternative lives
+            inside the UnlockPanel below — surfacing both here reads as
+            desperate to a suspicious indie hacker. */}
+        <div className="flex flex-col gap-2">
+          <Button onClick={onUnlock} loading={unlocking} size="lg" className="self-start">
             <Lock className="h-4 w-4" strokeWidth={2} aria-hidden />
             Unlock for {formatMoney(idea.unlock_price_cents)}
           </Button>
-          <Button onClick={onPro} variant="secondary" size="lg">
-            <Crown className="h-4 w-4" strokeWidth={2} aria-hidden />
-            Pro: unlimited unlocks · $15/mo
-          </Button>
+          <p className="font-mono text-xs uppercase tracking-wider text-cream-400">
+            Refunded automatically if you ship within 30 days
+          </p>
         </div>
 
         {error ? (

@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-
 import { ContactForm } from "@/components/contact/contact-form";
 import { ContactSidebar } from "@/components/contact/contact-sidebar";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { buildBreadcrumbSchema, schemaJson } from "@/lib/seo/schemas";
 
-export const metadata: Metadata = {
-  title: "Contact · Pannly",
+export const metadata = pageMetadata({
+  title: "Contact",
+  path: "/contact",
   description:
     "We're builders, not a corporation. Reach out and a human will read it.",
-  alternates: { canonical: "/contact" },
-  openGraph: { url: "/contact" },
-};
+});
+
+const BREADCRUMB = buildBreadcrumbSchema([{ name: "Contact", path: "/contact" }]);
 
 /**
  * /contact — public contact page.
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="w-full px-6 py-16 md:px-12 md:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
       <header className="mb-16 max-w-3xl">
         <h1 className="mb-4 font-display text-5xl tracking-tight text-ink-700 md:text-6xl">
           Contact us.

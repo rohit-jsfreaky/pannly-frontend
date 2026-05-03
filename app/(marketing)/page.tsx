@@ -9,6 +9,7 @@ import { PipelineFlow } from "@/components/marketing/pipeline-flow";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { RefundTimeline } from "@/components/marketing/refund-timeline";
 import { WhereWeListen } from "@/components/marketing/where-we-listen";
+import { buildSpeakableWebPage, schemaJson } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = {
   title: "Pannly — Find an idea worth building. Get refunded if you actually ship.",
@@ -17,6 +18,16 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: { url: "/" },
 };
+
+// SpeakableSpecification: marks the H1 and any element with .geo-speakable as
+// the preferred passage for voice assistants and AI Overviews. Hero.tsx
+// applies the class to the definitional one-sentence paragraph.
+const SPEAKABLE_HOMEPAGE = buildSpeakableWebPage({
+  url: "/",
+  name: "Pannly — Indie idea finder with refund-on-ship pricing",
+  description:
+    "Pannly is a startup idea finder that surfaces validated software opportunities from real Reddit and Hacker News pain threads, priced at $3 per brief with an automatic refund if you ship within 30 days.",
+});
 
 /**
  * Landing page — 9 stacked sections, top to bottom.
@@ -38,6 +49,10 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(SPEAKABLE_HOMEPAGE) }}
+      />
       <Hero />
       <WhereWeListen />
       <PipelineFlow />
