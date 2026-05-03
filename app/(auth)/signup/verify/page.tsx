@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { OtpInput } from "@/components/auth/otp-input";
@@ -14,7 +14,7 @@ import { signupStart, signupVerify } from "@/lib/api/auth";
 
 const RESEND_COOLDOWN = 60; // seconds — backend rate-limits at 3/email/hour anyway
 
-export default function SignupVerifyPage() {
+function SignupVerifyPageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
@@ -144,5 +144,13 @@ export default function SignupVerifyPage() {
         </div>
       </form>
     </AuthShell>
+  );
+}
+
+export default function SignupVerifyPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupVerifyPageInner />
+    </Suspense>
   );
 }

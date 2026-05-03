@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,7 +27,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export default function SignupCompletePage() {
+function SignupCompletePageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
@@ -159,5 +159,13 @@ export default function SignupCompletePage() {
         </SubmitButton>
       </form>
     </AuthShell>
+  );
+}
+
+export default function SignupCompletePage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupCompletePageInner />
+    </Suspense>
   );
 }

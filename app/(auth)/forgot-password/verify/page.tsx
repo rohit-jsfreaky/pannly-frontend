@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { OtpInput } from "@/components/auth/otp-input";
@@ -14,7 +14,7 @@ import { saveChallengeToken } from "@/lib/challenge-token";
 
 const RESEND_COOLDOWN = 60;
 
-export default function ForgotVerifyPage() {
+function ForgotVerifyPageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
@@ -142,5 +142,13 @@ export default function ForgotVerifyPage() {
         </div>
       </form>
     </AuthShell>
+  );
+}
+
+export default function ForgotVerifyPage() {
+  return (
+    <Suspense fallback={null}>
+      <ForgotVerifyPageInner />
+    </Suspense>
   );
 }

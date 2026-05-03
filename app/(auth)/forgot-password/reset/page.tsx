@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,7 +31,7 @@ const schema = z
 
 type FormData = z.infer<typeof schema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
@@ -163,5 +163,15 @@ export default function ResetPasswordPage() {
         </SubmitButton>
       </form>
     </AuthShell>
+  );
+}
+
+export default function ResetPasswordPage() {
+  // useSearchParams must live under a Suspense boundary or Next bails the
+  // static prerender. The inner component does the real work.
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordPageInner />
+    </Suspense>
   );
 }
