@@ -25,6 +25,24 @@ export function SiteFooter() {
           <p className="text-sm tracking-wide text-ink-50/80">
             © {new Date().getFullYear()} Pannly. Built in public from India.
           </p>
+          {/* ShipBoost "Featured on" badge — links back to the directory.
+              Standard third-party badge served from shipboost.io's CDN, so
+              we use a plain <img> rather than next/image (no point in
+              optimising an SVG hosted elsewhere). */}
+          <a
+            href="https://shipboost.io"
+            data-shipboost-badge="free-launch"
+            target="_blank"
+            rel="noopener"
+            className="inline-block w-fit"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://shipboost.io/ShipBoost-Badge/ShipBoost-Light-Badge.svg"
+              alt="Featured on ShipBoost"
+              style={{ height: 54, width: "auto" }}
+            />
+          </a>
         </div>
 
         <div className="flex flex-wrap justify-start gap-x-8 gap-y-4 md:col-span-2 md:justify-end">
