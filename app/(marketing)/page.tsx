@@ -9,6 +9,7 @@ import { LiveNumbers } from "@/components/marketing/live-numbers";
 import { PipelineFlow } from "@/components/marketing/pipeline-flow";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { RefundTimeline } from "@/components/marketing/refund-timeline";
+import { HomePagePrefetcher } from "@/components/marketing/route-prefetcher";
 import { WhereWeListen } from "@/components/marketing/where-we-listen";
 import { SkeletonBlock } from "@/components/ui/skeleton-block";
 import { buildSpeakableWebPage, schemaJson } from "@/lib/seo/schemas";
@@ -55,6 +56,11 @@ export default function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(SPEAKABLE_HOMEPAGE) }}
       />
+      {/* Programmatically prefetches the most-likely-next routes (feed,
+          pricing, how-it-works, refunds, built, about) once the homepage
+          mounts. Renders nothing. By the time a Product Hunt visitor
+          clicks any nav item or hero CTA, the route is already cached. */}
+      <HomePagePrefetcher />
       <Hero />
       <WhereWeListen />
       <PipelineFlow />

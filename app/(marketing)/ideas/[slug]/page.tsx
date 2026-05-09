@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { LockedView } from "@/components/ideas/locked-view";
 import { RelatedBriefs } from "@/components/ideas/related-briefs";
 import { UnlockedView } from "@/components/ideas/unlocked-view";
+import { IdeaPagePrefetcher } from "@/components/marketing/route-prefetcher";
 import { BackLink } from "@/components/ui/back-link";
 import { ApiError, apiGet } from "@/lib/api-client";
 import type { IdeaDetailResponse } from "@/lib/api/ideas";
@@ -121,6 +122,10 @@ export default async function IdeaDetailPage({ params }: Params) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(breadcrumbSchema) }}
       />
+      {/* Programmatically prefetch /feed (back-button) and the related-idea
+          slugs in the sidebar. By the time the user clicks Back or any
+          related card, the route is already cached. Renders nothing. */}
+      <IdeaPagePrefetcher relatedSlugs={data.related.map((r) => r.slug)} />
       <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-10">
         <div className="mb-8">
           <BackLink fallbackHref={"/feed" as Route} label="Back" />

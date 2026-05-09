@@ -34,7 +34,12 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://plausible.io https://analytics.pannly.com",
+      // 'self' = same-origin (pannly.getrevlio.com). The API lives on the
+      // api.* subdomain which is a DIFFERENT origin from CSP's perspective, so
+      // it must be listed explicitly. Without this every browser → backend
+      // fetch trips a CSP report (and would be blocked once we flip CSP out
+      // of Report-Only mode).
+      "connect-src 'self' https://api.pannly.getrevlio.com https://plausible.io https://analytics.pannly.com",
       "form-action 'self' https://test.dodopayments.com https://live.dodopayments.com",
       "upgrade-insecure-requests",
     ].join("; ");

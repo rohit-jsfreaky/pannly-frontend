@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -20,6 +20,7 @@ export function useGalleryParams() {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const params: GalleryQuery = useMemo(() => {
     const sortRaw = sp.get("sort") as BuildSort | null;
@@ -59,11 +60,15 @@ export function useGalleryParams() {
 
       const qs = next.toString();
       const url = (qs ? `${pathname}?${qs}` : pathname) as Route;
-      if (mode === "push") router.push(url);
-      else router.replace(url);
+      // startTransition keeps the existing card grid mounted while the new
+      // page loads — pagination on /built feels instant.
+      startTransition(() => {
+        if (mode === "push") router.push(url);
+        else router.replace(url);
+      });
     },
     [pathname, router, sp],
   );
 
-  return { params, setParams };
+  return { params, setParams, isPending };
 }

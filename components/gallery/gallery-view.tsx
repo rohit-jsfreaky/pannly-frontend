@@ -21,7 +21,7 @@ import { useGalleryParams } from "@/lib/hooks/use-gallery-params";
  * uses push so the back button works as expected.
  */
 export function GalleryView() {
-  const { params, setParams } = useGalleryParams();
+  const { params, setParams, isPending } = useGalleryParams();
   const { data, loading, error } = useGallery(params);
   const cats = useBuildCategories();
 
@@ -41,17 +41,27 @@ export function GalleryView() {
         onSortChange={(sort) => setParams({ sort, page: null })}
       />
 
-      <GalleryList items={data?.items ?? []} loading={loading} error={error} />
+      {/* isPending fades the existing grid while pagination/filter changes
+          resolve — clicks feel instant even if the next page takes 200ms. */}
+      <div
+        className={
+          "transition-opacity duration-150 " +
+          (isPending ? "pointer-events-none opacity-60" : "opacity-100")
+        }
+        aria-busy={isPending}
+      >
+        <GalleryList items={data?.items ?? []} loading={loading} error={error} />
 
-      {data?.pagination ? (
-        <FeedPagination
-          page={data.pagination.page}
-          totalPages={data.pagination.total_pages}
-          hasPrev={data.pagination.has_prev}
-          hasNext={data.pagination.has_next}
-          onChange={(page) => setParams({ page }, "push")}
-        />
-      ) : null}
+        {data?.pagination ? (
+          <FeedPagination
+            page={data.pagination.page}
+            totalPages={data.pagination.total_pages}
+            hasPrev={data.pagination.has_prev}
+            hasNext={data.pagination.has_next}
+            onChange={(page) => setParams({ page }, "push")}
+          />
+        ) : null}
+      </div>
 
       <GalleryCta />
     </div>

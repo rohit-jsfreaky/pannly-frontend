@@ -4,7 +4,7 @@ import { Compass } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { StatsStrip } from "@/components/dashboard/stats-strip";
@@ -29,6 +29,9 @@ const ALLOWED_TABS: readonly UnlockTab[] = ["all", "building", "submitted", "ref
 export function DashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // useTransition flag — fades the unlock list during a tab/page change
+  // so the navigation feels instant even when /v1/me/unlocks is slow.
+  const [isPending, startTransition] = useTransition();
 
   const tab: UnlockTab = useMemo(() => {
     const raw = searchParams.get("tab");
@@ -55,8 +58,12 @@ export function DashboardView() {
       }
       const qs = params.toString();
       const url = qs ? `/unlocks?${qs}` : "/unlocks";
-      if (mode === "push") router.push(url as Route);
-      else router.replace(url as Route);
+      // Wrap in startTransition so the existing list stays visible while
+      // the new tab/page loads — pagination/tab clicks feel instant.
+      startTransition(() => {
+        if (mode === "push") router.push(url as Route);
+        else router.replace(url as Route);
+      });
     },
     [router, searchParams],
   );
@@ -78,7 +85,13 @@ export function DashboardView() {
         </div>
       </header>
 
-      <section>
+      <section
+        className={
+          "transition-opacity duration-150 " +
+          (isPending ? "pointer-events-none opacity-60" : "opacity-100")
+        }
+        aria-busy={isPending}
+      >
         <DashboardTabs
           active={tab}
           counts={dashboard.data?.tab_counts ?? null}

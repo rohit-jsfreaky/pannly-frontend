@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -16,11 +16,17 @@ const VALID_SORTS: ReadonlyArray<FeedSort> = ["score", "recent", "trending", "bu
  * History semantics:
  *   - Filter / sort / search changes → replace (one entry per session).
  *   - Page changes                   → push   (back-button returns to prev page).
+ *
+ * Pending state: every URL update is wrapped in `startTransition`, which
+ * gives us an `isPending` flag during the navigation. The FeedView uses
+ * that to fade the existing cards instead of clearing them — pagination
+ * feels instant even when the new page's data takes 200-400ms to land.
  */
 export function useFeedParams() {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const params: FeedQuery = useMemo(() => {
     const tagsRaw = sp.get("tags") ?? "";
@@ -77,11 +83,16 @@ export function useFeedParams() {
 
       const qs = next.toString();
       const url = (qs ? `${pathname}?${qs}` : pathname) as Route;
-      if (mode === "push") router.push(url);
-      else router.replace(url);
+      // startTransition lets React mark the URL change as a transition,
+      // exposing isPending and (more importantly) keeping the previous UI
+      // mounted during the navigation so pagination doesn't feel "stuck".
+      startTransition(() => {
+        if (mode === "push") router.push(url);
+        else router.replace(url);
+      });
     },
     [pathname, router, sp],
   );
 
-  return { params, setParams };
+  return { params, setParams, isPending };
 }

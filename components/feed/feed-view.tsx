@@ -16,6 +16,7 @@ import type {
 } from "@/lib/api/feed";
 import { seedSidebarCache, useFeed, useFeedSidebar } from "@/lib/hooks/use-feed";
 import { useFeedParams } from "@/lib/hooks/use-feed-params";
+import { useRoutePrefetcher } from "@/lib/hooks/use-route-prefetcher";
 import { useMyUnlockedSlugs } from "@/lib/hooks/use-unlocked-slugs";
 
 const FALLBACK_TOPICS: FeedTopic[] = [
@@ -59,7 +60,7 @@ export function FeedView({ initialData, initialKey, initialPopular, initialTopic
     seedSidebarCache(initialPopular ?? null, initialTopics ?? null);
   }
 
-  const { params, setParams } = useFeedParams();
+  const { params, setParams, isPending } = useFeedParams();
   const { data, loading, error } = useFeed(params, initialData ?? null, initialKey);
   const sidebar = useFeedSidebar();
   // Fires ONCE per session for logged-in users; empty for anon.
@@ -75,6 +76,13 @@ export function FeedView({ initialData, initialKey, initialPopular, initialTopic
       seedSidebarCache(initialPopular ?? null, initialTopics ?? null);
     }
   }, [initialPopular, initialTopics]);
+
+  // Prefetch the top idea slugs so clicking any of the first cards is
+  // instant. Idea pages are dynamic routes — without programmatic prefetch
+  // they only get prefetched down to the loading.tsx boundary on viewport
+  // entry. This warms them as soon as feed data is ready.
+  const topSlugs = (data?.items ?? []).slice(0, 6).map((i) => `/ideas/${encodeURIComponent(i.slug)}`);
+  useRoutePrefetcher(topSlugs);
 
   return (
     <div className="flex flex-col gap-12 px-6 pb-16 pt-12 md:px-12">
@@ -104,7 +112,17 @@ export function FeedView({ initialData, initialKey, initialPopular, initialTopic
           }}
         />
 
-        <div className="flex flex-grow flex-col gap-6">
+        {/* `isPending` from useTransition fades the existing list while the
+            URL change resolves. The cards stay mounted (no flash to blank),
+            interactivity is disabled to prevent double-clicks, and the
+            opacity drop signals "loading next page" without a layout shift. */}
+        <div
+          className={
+            "flex flex-grow flex-col gap-6 transition-opacity duration-150 " +
+            (isPending ? "pointer-events-none opacity-60" : "opacity-100")
+          }
+          aria-busy={isPending}
+        >
           <FeedList
             items={data?.items ?? []}
             loading={loading}
