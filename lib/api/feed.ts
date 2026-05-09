@@ -104,14 +104,28 @@ function buildQuery(q: FeedQuery): Record<string, string | number | undefined> {
 //  Public API                                                          //
 // =================================================================== //
 
+// Public, anonymous endpoints. Cache server-side so the SSR'd /feed page
+// (and the per-idea metadata fetches) don't re-hit the backend on every
+// visit. Browser ignores `next.revalidate`, so this is safe when the same
+// helpers are invoked from client hooks too.
 export const fetchFeed = (query: FeedQuery, signal?: AbortSignal) =>
-  apiGet<FeedResponse>("/v1/feed", { query: buildQuery(query), signal });
+  apiGet<FeedResponse>("/v1/feed", {
+    query: buildQuery(query),
+    signal,
+    next: { revalidate: 60 },
+  });
 
+// Popular tags + topics are very stable — long TTL so they're effectively
+// edge-cached after the first request.
 export const fetchPopularTags = (limit?: number, signal?: AbortSignal) =>
   apiGet<PopularTagsResponse>("/v1/feed/popular-tags", {
     query: limit ? { limit } : undefined,
     signal,
+    next: { revalidate: 300 },
   });
 
 export const fetchTopics = (signal?: AbortSignal) =>
-  apiGet<FeedTopicsResponse>("/v1/feed/topics", { signal });
+  apiGet<FeedTopicsResponse>("/v1/feed/topics", {
+    signal,
+    next: { revalidate: 300 },
+  });

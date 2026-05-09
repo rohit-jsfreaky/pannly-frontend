@@ -23,30 +23,22 @@ const BREADCRUMB = buildBreadcrumbSchema([
 /**
  * /built — public Build Gallery. Auth-free; everything renders for anon users.
  *
+ * The page component itself is SYNC so the HTML shell streams to the
+ * browser immediately. The schema fetch (which awaits the backend) lives
+ * in a separate async component wrapped in Suspense. This way the page
+ * shell + GalleryView paint without waiting on the schema fetch — bots
+ * still see the schema once it streams in (it lands in <head> equivalents
+ * a moment later, well within Googlebot's render budget).
+ *
  * Wrapped in <Suspense> because <GalleryView> reads search params via
  * useSearchParams(), which Next requires under a Suspense boundary.
- *
- * Server-side we ALSO fetch the first 12 builds and embed them as a
- * CollectionPage + ItemList JSON-LD block. Bots that don't execute JS still
- * get a structured list of the gallery's first page; the sitemap covers the
- * rest.
  */
-export default async function BuildGalleryPage() {
-  const items = await fetchInitialBuildsForSchema();
-  const graph = buildGalleryGraph(
-    items.map((b) => ({
-      slug: b.idea_slug,
-      name: b.build_name,
-      description: b.idea_pain ?? b.idea_title,
-    })),
-  );
-
+export default function BuildGalleryPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: schemaJson(graph) }}
-      />
+      <Suspense fallback={null}>
+        <GalleryItemListSchema />
+      </Suspense>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
@@ -55,6 +47,28 @@ export default async function BuildGalleryPage() {
         <GalleryView />
       </Suspense>
     </>
+  );
+}
+
+/**
+ * Async schema injector. Streams the CollectionPage + ItemList JSON-LD
+ * block into the response once the build list is fetched. Doesn't block
+ * the visible UI.
+ */
+async function GalleryItemListSchema() {
+  const items = await fetchInitialBuildsForSchema();
+  const graph = buildGalleryGraph(
+    items.map((b) => ({
+      slug: b.idea_slug,
+      name: b.build_name,
+      description: b.idea_pain ?? b.idea_title,
+    })),
+  );
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: schemaJson(graph) }}
+    />
   );
 }
 

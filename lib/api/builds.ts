@@ -97,11 +97,20 @@ function buildQuery(q: GalleryQuery): Record<string, string | number | undefined
 //  Public API                                                          //
 // =================================================================== //
 
+// Public, anonymous endpoints. Cache server-side so SSR for /built doesn't
+// re-hit the backend on every visit. Categories change rarely — longer TTL.
 export const fetchGallery = (query: GalleryQuery, signal?: AbortSignal) =>
-  apiGet<GalleryResponse>("/v1/builds", { query: buildQuery(query), signal });
+  apiGet<GalleryResponse>("/v1/builds", {
+    query: buildQuery(query),
+    signal,
+    next: { revalidate: 120 },
+  });
 
 export const fetchBuildCategories = (signal?: AbortSignal) =>
-  apiGet<CategoriesResponse>("/v1/builds/categories", { signal });
+  apiGet<CategoriesResponse>("/v1/builds/categories", {
+    signal,
+    next: { revalidate: 600 },
+  });
 
 // =================================================================== //
 //  Submission flow — /v1/unlocks/{id}/draft + /submit                  //

@@ -64,6 +64,11 @@ export function TopNav() {
           <Wordmark />
         </Link>
 
+        {/* Force prefetch={true} on every nav link. These are the most-clicked
+            links on the entire site — every visitor hits at least one. With
+            the loading.tsx boundaries in place from the perf sweep, even the
+            dynamic-route ones (/feed, /built, /refunds) now prefetch fully on
+            viewport entry, so clicks feel like SPA navigations. */}
         <div className="hidden items-center gap-8 md:flex">
           {links.map((l) => {
             const isActive =
@@ -72,6 +77,7 @@ export function TopNav() {
               <Link
                 key={l.href}
                 href={l.href}
+                prefetch={true}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "font-display text-sm tracking-tight transition-colors",

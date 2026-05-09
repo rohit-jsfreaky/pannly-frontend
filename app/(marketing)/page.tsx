@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { BriefAnatomy } from "@/components/marketing/brief-anatomy";
 import { FinalCtaBand } from "@/components/marketing/final-cta-band";
@@ -9,6 +10,7 @@ import { PipelineFlow } from "@/components/marketing/pipeline-flow";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { RefundTimeline } from "@/components/marketing/refund-timeline";
 import { WhereWeListen } from "@/components/marketing/where-we-listen";
+import { SkeletonBlock } from "@/components/ui/skeleton-block";
 import { buildSpeakableWebPage, schemaJson } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = {
@@ -58,10 +60,47 @@ export default function LandingPage() {
       <PipelineFlow />
       <BriefAnatomy />
       <RefundTimeline />
-      <LiveNumbers />
+      {/* LiveNumbers awaits two backend calls (refunds summary + ledger).
+          Wrapping it in Suspense lets the rest of the page stream to the
+          browser without waiting — Hero / WhereWeListen / pipeline / etc.
+          paint immediately, LiveNumbers fills in once its data arrives.
+          With the new revalidate=60 caching it's mostly an instant cache
+          hit, but on cold cache (every 60s) Suspense keeps the page from
+          stalling on a backend roundtrip. */}
+      <Suspense fallback={<LiveNumbersFallback />}>
+        <LiveNumbers />
+      </Suspense>
       <PricingCards />
       <LandingFaq />
       <FinalCtaBand />
     </>
+  );
+}
+
+function LiveNumbersFallback() {
+  return (
+    <section className="px-6 md:px-12">
+      <div className="mx-auto max-w-[1280px] py-24 md:py-32">
+        <div className="mb-12 max-w-2xl">
+          <SkeletonBlock className="mb-3 h-3 w-32" />
+          <SkeletonBlock className="mb-4 h-10 w-full max-w-md" />
+          <SkeletonBlock className="h-4 w-3/4" />
+        </div>
+        <div className="rounded-2xl border border-cream-300 bg-cream-50 p-8 shadow-soft md:p-14">
+          <div className="grid grid-cols-1 gap-10 border-b border-cream-300/60 pb-10 md:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i}>
+                <SkeletonBlock className="mb-3 h-12 w-32" />
+                <SkeletonBlock className="h-3 w-24" />
+              </div>
+            ))}
+          </div>
+          <div className="pt-10">
+            <SkeletonBlock className="mb-4 h-3 w-48" />
+            <SkeletonBlock className="h-[260px] w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

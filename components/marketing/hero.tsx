@@ -39,9 +39,15 @@ export function Hero() {
             this" posts, score each one, and write the brief.
           </p>
 
+          {/* prefetch={true} forces full prefetch (HTML + data) for these
+              dynamic-route CTAs as soon as Hero hits the viewport. Default
+              `auto` prefetches only down to the loading.tsx boundary, which
+              is fine for casual links — these two are the primary CTAs from
+              Product Hunt traffic, so we want them warm BEFORE the click. */}
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link
               href={"/feed" as Route}
+              prefetch={true}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-moss-600 px-6 py-3 text-base font-medium text-cream-50 shadow-sm transition-opacity hover:opacity-90"
             >
               Browse the feed
@@ -49,6 +55,7 @@ export function Hero() {
             </Link>
             <Link
               href={"/how-it-works" as Route}
+              prefetch={true}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-cream-300 bg-cream-50 px-6 py-3 text-base font-medium text-ink-700 transition-colors hover:bg-cream-200"
             >
               How it works

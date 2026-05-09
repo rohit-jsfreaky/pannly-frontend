@@ -23,15 +23,19 @@ export function FinalCtaBand() {
             ship within 30 days.
           </p>
 
+          {/* Bottom-of-page CTAs — by the time the user is here they're
+              evaluating, force-prefetch ensures the click is instant. */}
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href={"/feed" as Route}
+              prefetch={true}
               className="inline-flex items-center justify-center rounded-xl bg-moss-600 px-7 py-3 text-base font-medium text-cream-50 shadow-sm transition-opacity hover:opacity-90"
             >
               Browse the feed
             </Link>
             <Link
               href={"/refunds" as Route}
+              prefetch={true}
               className="inline-flex items-center justify-center rounded-xl border border-cream-300 bg-cream-50 px-7 py-3 text-base font-medium text-ink-700 transition-colors hover:bg-cream-100"
             >
               See refund ledger

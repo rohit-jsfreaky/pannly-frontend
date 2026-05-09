@@ -45,10 +45,16 @@ export interface LedgerQuery {
   per_page?: number;
 }
 
+// Public, anonymous endpoints — safe to cache server-side. The 60-second
+// revalidate is short enough that newly issued refunds appear quickly,
+// long enough that bursts of homepage views don't all hit the backend.
+// `next.revalidate` is silently ignored by the browser, so the same call
+// works fine when invoked from a client component too.
 export const fetchRefundsSummary = (signal?: AbortSignal) =>
   apiGet<RefundsSummary>("/v1/refunds", {
     signal,
     withCredentials: false,
+    next: { revalidate: 60 },
   });
 
 export const fetchRefundsLedger = (query: LedgerQuery = {}, signal?: AbortSignal) => {
@@ -59,5 +65,6 @@ export const fetchRefundsLedger = (query: LedgerQuery = {}, signal?: AbortSignal
     query: params,
     signal,
     withCredentials: false,
+    next: { revalidate: 60 },
   });
 };
