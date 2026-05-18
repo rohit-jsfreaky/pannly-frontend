@@ -59,3 +59,14 @@ export default function robots(): MetadataRoute.Robots {
     host: base,
   };
 }
+
+/**
+ * IndexNow API key. The value must match the filename of the key file in
+ * /public/{KEY}.txt and the contents of that file. Bing reads the key from
+ * the file at publish-ping time to verify ownership.
+ *
+ * Rotate by: (1) generating a new 32-char hex via `secrets.token_hex(16)`,
+ * (2) renaming /public/{KEY}.txt and its contents, (3) updating this constant.
+ * The IndexNow protocol explicitly supports key rotation — no API call needed.
+ */
+export const INDEXNOW_KEY = "db34134f3d0abe29189f9779cb8cbae3";

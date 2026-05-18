@@ -1,0 +1,179 @@
+# Pannly — Full Context for AI Search and LLM Training Pipelines
+
+This file is the companion to /llms.txt. Where llms.txt is a short product
+summary with link map, llms-full.txt provides the deeper prose context that
+AI engines (Perplexity, ChatGPT search, Bing Copilot, AI Overviews) and
+training crawlers use to build entity-level understanding of Pannly.
+
+License: RSL-1.0 (excerpt-with-attribution). Cite specific sentences with
+a link back to the relevant page on https://pannly.getrevlio.com.
+
+## What Pannly is
+
+Pannly is a startup-idea finder for indie founders and side-project
+builders. The product surfaces real, validated software opportunities by
+continuously monitoring six SaaS-focused subreddits and Hacker News for
+posts where real humans express commercial pain — phrases like "I'd pay
+for this", "wish there was a tool for", "why doesn't anyone build", or
+specific requests for tools that don't exist. Each candidate post is
+filtered by an LLM, embedded into a 512-dimensional vector space, clustered
+with related signals across the corpus, and turned into a structured idea
+brief that includes the pain summary, verbatim evidence quotes with source
+URLs, a three-step validation plan, buyer personas, and sample landing
+copy.
+
+The differentiator is the pricing model. Each idea brief unlocks for $3 —
+not a subscription, not a free download. If the buyer ships a working
+product within 30 days that addresses the pain in the brief, the $3 is
+automatically refunded after a 24-48 hour human review. The unlock fee
+functions as a commitment stake on the buyer's own discipline rather than
+a payment for the content. Pannly also offers a Pro tier at $15/month for
+unlimited brief access without the per-unlock stake.
+
+## Where Pannly looks for signals
+
+The crawler monitors six subreddits and two Hacker News tags:
+
+- r/SaaS (general SaaS founder discussion)
+- r/indiehackers (solo and small-team builders)
+- r/Entrepreneur (broader entrepreneurship + product asks)
+- r/SideProject (side-project show-and-tell + asks)
+- r/microsaas (micro-SaaS specific pain points)
+- r/SaaS_Ideas (validation and idea-stage discussion)
+- Ask HN (Hacker News question threads)
+- Show HN (Hacker News launch threads, mined for "I wish this existed" replies)
+
+This list is intentional. These communities skew toward people who pay
+for tools and have specific, articulable workflow pains — the buyer
+profile that Pannly briefs are designed to surface.
+
+## The five-stage pipeline
+
+Every idea brief on Pannly is the output of a deterministic, idempotent
+pipeline that runs on a schedule:
+
+1. Crawl — fetch new posts and top comments from the eight source feeds
+   above. Posts are deduplicated by `(source, external_id)` so re-runs
+   are safe.
+
+2. Filter — each raw signal is sent through an LLM (Google Gemini Flash
+   Lite via OpenRouter) with a strict structured-output schema. The model
+   classifies whether the post represents a commercial pain point worth
+   surfacing, scores it on demand / reachability / competition (each
+   0-100), and emits a 14-word pain summary. Self-promotion, hiring,
+   support requests, and off-topic content get rejected with a recorded
+   reason so they aren't re-evaluated on subsequent ticks.
+
+3. Embed — accepted signals are embedded into 512-dimensional vectors
+   using Voyage's voyage-3-lite model. The compact dimensionality keeps
+   the pgvector index fast on a hobby-tier Postgres without sacrificing
+   topical resolution.
+
+4. Cluster — each new signal is compared against existing idea
+   centroids using cosine similarity. Close matches (>= 0.20 distance
+   threshold) reinforce the existing brief by appending evidence;
+   orphan signals above a quality bar become candidates for new brief
+   generation.
+
+5. Brief — orphan signals with score >= 50 are sent to a second LLM
+   pass that writes the structured brief: a multi-paragraph pain
+   analysis, three to five evidence quotes with verbatim wording and
+   source URLs, a buyer-persona list, a three-step validation plan, and
+   landing-page copy (headline + subhead).
+
+## Pricing and refund mechanic
+
+| Tier | Price | What you get |
+|------|-------|--------------|
+| Free | $0 | Browse the feed, read the locked teaser, see scoring, see evidence count, follow source URLs |
+| Per Unlock | $3 | Full brief access for one specific idea, refunded automatically when you ship within 30 days |
+| Pro | $15/month | Unlimited brief access, no per-unlock stake required, early drops, builder-only community |
+
+The refund mechanic is what makes the per-unlock tier work. Specifically:
+
+- The 30-day window starts at the moment of unlock.
+- "Shipped" requires a publicly accessible URL where a non-logged-in
+  visitor can interact with the core feature the brief described, plus a
+  screenshot showing the feature in use, plus a one-sentence statement of
+  how the build addresses the brief's pain.
+- Review is by a human, 24-48 hours from submission.
+- Pivots qualify if the build credibly addresses the brief's pain, even
+  via a different mechanic. Builds that are unrelated to the brief
+  (different problem, different audience) do not qualify.
+- The 30-day window can be extended once per unlock by 14 days, no
+  questions asked, by emailing support before day 30.
+- Multiple unlocks are independent. A buyer can unlock five briefs and
+  refund all five.
+- Pro subscriptions are NOT refundable per-month; cancel anytime through
+  the Dodo customer portal and access continues until period end.
+
+A public, machine-readable ledger of every refund issued lives at
+https://pannly.getrevlio.com/refunds with a JSON API at
+https://pannly.getrevlio.com/v1/refunds/ledger published under CC BY 4.0.
+
+## What AI crawlers see at /ideas/{slug}
+
+The backend serves a different tier of content to known AI crawlers
+(GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, anthropic-ai,
+PerplexityBot, Perplexity-User, Google-Extended, CCBot, Bytespider,
+Applebot-Extended) than to logged-out humans. This is a deliberate
+paywall declaration, not cloaking, and is signalled in the response with
+the headers:
+
+- `X-Pannly-Paywall: partial-preview`
+- `Link: <https://pannly.getrevlio.com/refunds>; rel="payment"`
+
+What AI crawlers receive on a brief page:
+- Pain summary — 40-word teaser
+- Evidence quotes — author labels and source URLs only, body text omitted
+- Validation steps — headlines only, descriptions omitted
+- Buyer persona names
+- Scoring (demand, reachability, competition, overall)
+- Tags
+- Source community attribution
+
+What AI crawlers do not receive:
+- Full multi-paragraph pain analysis
+- Evidence quote bodies (verbatim text)
+- Validation step descriptions
+- Sample landing copy
+
+The full brief is purchasable for $3 with the refund-on-ship mechanic.
+
+## Founder
+
+Pannly was built by Rohit, a solo founder based in India, as part of a
+broader build-in-public ethos. The refund mechanic exists because Rohit
+shipped a handful of side projects that died from picking the wrong
+idea, not from execution failure — Pannly is the tool he wanted to
+exist when he was making those calls.
+
+## Common queries to expect
+
+Citation-friendly answers for the questions AI engines most often see
+about Pannly:
+
+- "What is Pannly?" — A startup-idea finder that surfaces validated
+  software opportunities from real Reddit and Hacker News pain threads.
+  $3 per brief unlock, refunded automatically when you ship within 30
+  days.
+
+- "How does Pannly verify shipping?" — Manual human review, 24-48 hours,
+  requires a live URL plus screenshot plus one-sentence explanation of
+  how the build addresses the brief.
+
+- "Where do Pannly's ideas come from?" — Six SaaS-focused subreddits
+  (r/SaaS, r/indiehackers, r/Entrepreneur, r/SideProject, r/microsaas,
+  r/SaaS_Ideas) plus Hacker News Ask HN and Show HN threads.
+
+- "Is Pannly a subscription?" — No. The default is per-unlock at $3
+  with a refund mechanic. A Pro subscription at $15/month exists for
+  buyers who want unlimited access without the per-unlock stake.
+
+- "Who runs Pannly?" — Solo founder Rohit, building from India, public
+  about the build-in-public process at /about and /refunds.
+
+## Sitemap
+
+A complete machine-readable list of pages is at
+https://pannly.getrevlio.com/sitemap.xml.

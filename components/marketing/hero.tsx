@@ -2,14 +2,39 @@ import type { Route } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { fetchFeed } from "@/lib/api/feed";
+
+/**
+ * Best-effort count of live idea briefs. Fetched server-side so the number is
+ * baked into the HTML for AI engines to cite. Per-page revalidation (300s on
+ * the homepage route) keeps this from hammering the backend.
+ *
+ * Failure-soft: if the API is unreachable we omit the count instead of
+ * showing a stale or zero number.
+ */
+async function fetchBriefCount(): Promise<number | null> {
+  try {
+    const res = await fetchFeed({ page: 1, per_page: 1 });
+    return res.pagination?.total_count ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Landing hero. Two-column on desktop:
  *   left  — eyebrow, headline, sub, two CTAs, mono micro-line
  *   right — editorial flat-lay SVG (notebook + pen + foliage + bookmark)
  *
  * Stacks centred on mobile, illustration drops below.
+ *
+ * Server-rendered async so the brief count lands in the initial HTML for AI
+ * crawlers. The count is the most citable single fact about Pannly — making
+ * sure it's in the static markup (not JS-injected) is the difference between
+ * "Pannly has X validated briefs" being a citable passage vs invisible.
  */
-export function Hero() {
+export async function Hero() {
+  const briefCount = await fetchBriefCount();
   return (
     <section className="px-6 md:px-12">
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-16 py-24 md:grid-cols-12 md:py-32">
@@ -38,6 +63,27 @@ export function Hero() {
             We watch Reddit and Hacker News for the recurring "I'd pay for
             this" posts, score each one, and write the brief.
           </p>
+
+          {/* Corpus-size sentence. Server-rendered into static HTML so AI
+              engines (Perplexity, ChatGPT search, AI Overviews) have a
+              concrete, citable number — "Pannly has indexed N validated idea
+              briefs" is exactly the shape they extract. Falls back to a non-
+              numeric framing if the API is down. */}
+          {briefCount !== null && briefCount > 0 ? (
+            <p className="geo-speakable mt-4 max-w-2xl text-base leading-relaxed text-ink-50">
+              Today the feed holds{" "}
+              <span className="font-mono font-semibold tabular-nums text-ink-700">
+                {briefCount}
+              </span>{" "}
+              live idea briefs sourced from six SaaS-focused subreddits and
+              Hacker News.
+            </p>
+          ) : (
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-50">
+              The feed grows daily, sourced from six SaaS-focused subreddits and
+              Hacker News.
+            </p>
+          )}
 
           {/* prefetch={true} forces full prefetch (HTML + data) for these
               dynamic-route CTAs as soon as Hero hits the viewport. Default

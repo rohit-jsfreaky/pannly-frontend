@@ -32,6 +32,12 @@ export default function Page() {
         <p className="text-lg leading-relaxed text-ink-50">
           We're builders, not a corporation. Reach out and a human will read it.
         </p>
+        {/* Explicit response-time expectation — costs nothing to write, builds
+            perceived reliability and AI-citable specificity for support
+            queries. */}
+        <p className="mt-3 font-mono text-sm uppercase tracking-wider text-cream-500">
+          Typical response: within 1 business day
+        </p>
       </header>
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8 lg:gap-12">

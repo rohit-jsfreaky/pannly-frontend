@@ -14,8 +14,12 @@ interface Props {
  * monospace numerals from the design.
  */
 export function CountersStrip({ unlocked, building, shipped, className }: Props) {
+  // Renamed "unlocked" → "purchases" so the counter doesn't read like the
+  // user's own access state. Visual audit found "unlocked" appearing inches
+  // away from the paywall CTA was confusing — visitors thought they already
+  // had access. "purchases" is unambiguous.
   const items = [
-    { count: unlocked, label: "unlocked" },
+    { count: unlocked, label: "purchases" },
     { count: building, label: "building" },
     { count: shipped, label: "shipped" },
   ];

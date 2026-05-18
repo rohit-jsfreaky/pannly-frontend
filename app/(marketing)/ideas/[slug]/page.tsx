@@ -61,6 +61,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // one_line_pain is intentionally short and meta-safe (full pain is server-
   // capped). It's the right text for description, OG, and Twitter alike.
   const description = data.idea.one_line_pain ?? data.idea.title;
+  // NOTE: openGraph.images is intentionally OMITTED so Next.js merges in the
+  // dynamically-generated per-idea image from `opengraph-image.tsx` (sibling
+  // file in this route segment). Setting `images` here would override that
+  // and force every brief to share a single static asset.
   return {
     title: data.idea.title,
     description,
@@ -70,15 +74,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description,
       url: canonical,
       type: "article",
-      images: [
-        { url: "/og-default.png", width: 1200, height: 630, alt: data.idea.title },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: data.idea.title,
       description,
-      images: ["/og-default.png"],
     },
   };
 }
@@ -113,6 +113,7 @@ export default async function IdeaDetailPage({ params }: Params) {
               one_line_pain: data.idea.one_line_pain,
               tags: data.idea.tags,
               first_published_at: data.idea.first_published_at,
+              last_refreshed_at: data.idea.last_refreshed_at,
               unlock_price_cents: data.idea.unlock_price_cents,
             }),
           ),

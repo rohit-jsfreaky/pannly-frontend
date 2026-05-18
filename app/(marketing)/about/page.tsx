@@ -22,6 +22,9 @@ export const metadata = pageMetadata({
     "Why Pannly exists. The founder note, our scoring methodology, and how we build in public.",
 });
 
+// Pure static content. 1-day cache window — any edit re-deploys.
+export const revalidate = 86400;
+
 const ABOUT_GRAPH = buildAboutGraph({
   founderName: "Rohit",
   founderJobTitle: "Founder",

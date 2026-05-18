@@ -3,8 +3,10 @@ import { Suspense } from "react";
 import { RefundsView } from "@/components/refunds/refunds-view";
 import { fetchRefundsSummary, type RefundsSummary } from "@/lib/api/refunds";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { REFUNDS_FAQ } from "@/lib/seo/refunds-faq-data";
 import {
   buildBreadcrumbSchema,
+  buildFaqPage,
   buildRefundsDataset,
   schemaJson,
 } from "@/lib/seo/schemas";
@@ -17,6 +19,18 @@ export const metadata = pageMetadata({
 });
 
 const BREADCRUMB = buildBreadcrumbSchema([{ name: "Refunds", path: "/refunds" }]);
+
+// FAQPage JSON-LD wrapping the same Q&A pairs the page renders. Drives AI
+// citation eligibility for queries like "what counts as shipped on Pannly"
+// or "how does the Pannly refund work".
+const REFUNDS_FAQ_GRAPH = buildFaqPage({
+  url: "/refunds",
+  qas: REFUNDS_FAQ.map((item) => ({ question: item.q, answer: item.a })),
+});
+
+// Public ledger updates whenever a refund issues — 5 min lag is fine, and the
+// schema fetcher inside fail-soft handles backend hiccups.
+export const revalidate = 300;
 
 /**
  * /refunds — public refund transparency. Page is SYNC so HTML streams to
@@ -33,6 +47,10 @@ export default function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(REFUNDS_FAQ_GRAPH) }}
       />
       <RefundsView />
     </>

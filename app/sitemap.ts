@@ -26,10 +26,12 @@ import type { MetadataRoute } from "next";
 import { fetchFeed, type FeedIdea } from "@/lib/api/feed";
 import { env } from "@/lib/env";
 
-export const revalidate = 3600;
+// 10 minutes — was 3600 (1 hour). New ideas get visited by crawlers within
+// the same hour now instead of taking up to 60 min to surface.
+export const revalidate = 600;
 
-const PER_PAGE = 48; // Backend caps at 50 — keep <= 50.
-const MAX_PAGES = 5;
+const PER_PAGE = 50; // Backend cap.
+const MAX_PAGES = 10; // 500 idea ceiling — defensive headroom for growth.
 
 interface StaticRoute {
   path: string;
@@ -39,21 +41,22 @@ interface StaticRoute {
   lastmod?: string;
 }
 
-// `lastmod` pinned to the date copy was last edited. Bump these when you ship
-// a real content change to the page (not just a layout tweak).
-const STATIC_PINNED = "2026-05-01";
-
+// Per-route lastmod tracking the LAST CONTENT EDIT to each marketing page.
+// Update the relevant entry whenever you ship a real copy change. Synthetic
+// shared dates were a Google ranking signal red-flag (looked like a hardcoded
+// placeholder, which it was).
 const STATIC_ROUTES: StaticRoute[] = [
   { path: "/" },                        // homepage — content shifts with live numbers
   { path: "/feed" },                    // feed — fresh ideas, dynamic
   { path: "/built" },                   // gallery — dynamic
   { path: "/refunds" },                 // ledger — dynamic
-  { path: "/pricing",      lastmod: STATIC_PINNED },
-  { path: "/how-it-works", lastmod: STATIC_PINNED },
-  { path: "/about",        lastmod: STATIC_PINNED },
-  { path: "/contact",      lastmod: STATIC_PINNED },
-  { path: "/privacy",      lastmod: STATIC_PINNED },
-  { path: "/terms",        lastmod: STATIC_PINNED },
+  { path: "/pricing",      lastmod: "2026-05-14" },
+  { path: "/how-it-works", lastmod: "2026-05-14" },
+  { path: "/gummysearch-alternative", lastmod: "2026-05-18" },
+  { path: "/about",        lastmod: "2026-05-14" },
+  { path: "/contact",      lastmod: "2026-05-14" },
+  { path: "/privacy",      lastmod: "2026-05-01" },
+  { path: "/terms",        lastmod: "2026-05-01" },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

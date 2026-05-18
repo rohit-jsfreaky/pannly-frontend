@@ -14,6 +14,13 @@ export const metadata = pageMetadata({
     "Free to browse. $3 per idea unlock — refunded automatically when you ship within 30 days. Or $15/mo Pro for unlimited briefs.",
 });
 
+// The pricing PAGE itself is `"use client"` (subscription checkout flow needs
+// React state). Putting `revalidate` on the LAYOUT (a Server Component) caches
+// the surrounding shell + JSON-LD blocks. The interactive client island still
+// hydrates fresh in the browser — this just prevents a cold SSR shell on every
+// visitor. 1-day window matches the static copy.
+export const revalidate = 86400;
+
 const BREADCRUMB = buildBreadcrumbSchema([{ name: "Pricing", path: "/pricing" }]);
 
 const SPEAKABLE = buildSpeakableWebPage({

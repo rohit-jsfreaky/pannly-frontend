@@ -2,6 +2,7 @@
 
 import { MethodologyPanel } from "@/components/refunds/methodology-panel";
 import { PublicLedger } from "@/components/refunds/public-ledger";
+import { RefundsFaq } from "@/components/refunds/refunds-faq";
 import { RefundsHero } from "@/components/refunds/refunds-hero";
 import { useRefundsSummary } from "@/lib/hooks/use-refunds";
 
@@ -30,6 +31,12 @@ export function RefundsView() {
           <PublicLedger />
         </div>
       </div>
+
+      {/* Detailed FAQ — proof requirements, timeline, edge cases. Pushes the
+          page well past the thin-content threshold and provides the YMYL-
+          adjacent specificity Google's quality systems look for on
+          refund/payment pages. */}
+      <RefundsFaq />
     </div>
   );
 }

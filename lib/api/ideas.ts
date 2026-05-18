@@ -33,6 +33,9 @@ export interface IdeaHeader {
   shipped_count: number;
   unlock_price_cents: number;
   first_published_at: string | null;
+  /** Surfaces re-clustering / re-scoring as a freshness signal. Used by the
+   *  per-idea Product schema for `dateModified`. Optional on the wire. */
+  last_refreshed_at?: string | null;
 }
 
 // ===== Structured brief =====

@@ -3,7 +3,11 @@ import { MessageSquare, Lock, Infinity as InfinityIcon } from "lucide-react";
 import { HowItWorksStep } from "@/components/marketing/how-it-works-step";
 import { TrustStrip } from "@/components/marketing/trust-strip";
 import { pageMetadata } from "@/lib/seo/page-metadata";
-import { buildBreadcrumbSchema, schemaJson } from "@/lib/seo/schemas";
+import {
+  buildBreadcrumbSchema,
+  buildSpeakableWebPage,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
 export const metadata = pageMetadata({
   title: "How it works",
@@ -12,9 +16,24 @@ export const metadata = pageMetadata({
     "From a Reddit complaint to a refunded build — the architectural process behind every Pannly brief.",
 });
 
+// Pure static content, no per-request data. 1-day cache window is plenty —
+// any copy edit triggers a deploy which busts the cache anyway.
+export const revalidate = 86400;
+
 const BREADCRUMB = buildBreadcrumbSchema([
   { name: "How it works", path: "/how-it-works" },
 ]);
+
+// WebPage with SpeakableSpecification anchors the page to the WebSite graph
+// and tells voice / AI summarisation engines which DOM nodes to read.
+// `.geo-speakable` should be added to the most quotable definitional sentence
+// in the hero section of this page.
+const SPEAKABLE = buildSpeakableWebPage({
+  url: "/how-it-works",
+  name: "How Pannly works — unlock, build, get refunded",
+  description:
+    "The five-stage pipeline behind every Pannly brief: crawl Reddit and Hacker News, filter signals through an LLM, embed and cluster into ideas, then write a structured brief with evidence, scores, and a refund-on-ship $3 unlock.",
+});
 
 export default function HowItWorksPage() {
   return (
@@ -22,6 +41,10 @@ export default function HowItWorksPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(BREADCRUMB) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(SPEAKABLE) }}
       />
       {/* Hero */}
       <section className="max-w-4xl pb-8 pt-12">

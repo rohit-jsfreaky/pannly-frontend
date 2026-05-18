@@ -63,8 +63,15 @@ export function FeedFilterBar({
 
   return (
     <div className="sticky top-0 z-30 -mx-6 flex flex-col gap-3 border-b border-cream-300 bg-cream-100/95 px-6 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between md:-mx-12 md:px-12">
-      {/* Topic chips */}
-      <div className="-mx-1 flex w-full gap-2 overflow-x-auto px-1 pb-1 sm:w-auto">
+      {/* Topic chips. Each chip is min-h-11 (44px) to meet WCAG 2.5.5 — were
+          30px before. Horizontal scroll snap keeps the row navigable when
+          there are more chips than fit (no separate "more" affordance needed
+          because tablet 768px now scrolls cleanly with momentum on touch). */}
+      <div
+        className="-mx-1 flex w-full snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-1 pb-1 [scrollbar-width:thin] sm:w-auto"
+        role="tablist"
+        aria-label="Filter ideas by topic"
+      >
         {topics.map((t) => {
           const isActive =
             (t.slug === "all" && !activeTopic) ||
@@ -73,9 +80,11 @@ export function FeedFilterBar({
             <button
               key={t.slug}
               type="button"
+              role="tab"
+              aria-selected={Boolean(isActive)}
               onClick={() => onTopicChange(t.slug === "all" ? null : t.slug)}
               className={cn(
-                "whitespace-nowrap rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",
+                "min-h-11 snap-start whitespace-nowrap rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wider transition-colors",
                 isActive
                   ? "border-ink-700 bg-ink-700 text-cream-50"
                   : "border-cream-300 bg-cream-50 text-cream-400 hover:bg-cream-200 hover:text-ink-500",

@@ -8,6 +8,7 @@ type FooterLink = { href: Route | string; label: string; external?: boolean };
 const links: FooterLink[] = [
   { href: "/about", label: "About" },
   { href: "/how-it-works", label: "How it works" },
+  { href: "/gummysearch-alternative", label: "GummySearch Alternative" },
   { href: "/built", label: "Build Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/refunds", label: "Refunds" },
@@ -26,9 +27,9 @@ export function SiteFooter() {
             © {new Date().getFullYear()} Pannly. Built in public from India.
           </p>
           {/* ShipBoost "Featured on" badge — links back to the directory.
-              Standard third-party badge served from shipboost.io's CDN, so
-              we use a plain <img> rather than next/image (no point in
-              optimising an SVG hosted elsewhere). */}
+              Explicit width + height attrs prevent CLS when the external SVG
+              loads. Reserved box matches `style={{ height: 54 }}` rendered
+              size and the asset's intrinsic aspect ratio. */}
           <a
             href="https://shipboost.io"
             data-shipboost-badge="free-launch"
@@ -40,18 +41,31 @@ export function SiteFooter() {
             <img
               src="https://shipboost.io/ShipBoost-Badge/ShipBoost-Light-Badge.svg"
               alt="Featured on ShipBoost"
+              width={195}
+              height={54}
+              loading="lazy"
+              decoding="async"
               style={{ height: 54, width: "auto" }}
             />
           </a>
+
+          {/* Payment-provider trust signal. Surfaces the processor visibly
+              (the schema already includes Dodo via the Offer.seller chain
+              but the visible cue is what humans look for). */}
+          <p className="mt-1 text-xs leading-relaxed text-ink-50/70">
+            Payments processed securely by Dodo Payments.
+          </p>
         </div>
 
-        <div className="flex flex-wrap justify-start gap-x-8 gap-y-4 md:col-span-2 md:justify-end">
+        {/* Footer link list — min-h-11 + py-2 = 44px tap target. Were 20px
+            tall before and failed WCAG 2.5.5 on mobile. */}
+        <div className="flex flex-wrap justify-start gap-x-8 gap-y-2 md:col-span-2 md:justify-end">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href as Route}
               {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="text-sm tracking-wide text-ink-50/70 underline decoration-cream-300 underline-offset-4 transition-colors hover:text-plum-500"
+              className="inline-flex min-h-11 items-center text-sm tracking-wide text-ink-50/70 underline decoration-cream-300 underline-offset-4 transition-colors hover:text-plum-500"
             >
               {l.label}
             </Link>

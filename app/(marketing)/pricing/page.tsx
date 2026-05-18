@@ -52,12 +52,16 @@ export default function PricingPage() {
 
   return (
     <div className="bg-cream-100">
-      {/* Hero */}
-      <section className="mx-auto max-w-7xl px-6 pb-16 pt-24 text-center">
+      {/* Hero. Tightened mobile vertical padding (pt-12 → pt-12 from pt-24)
+          so the first pricing card lands above the 667px iPhone-SE fold.
+          Also added an early "Unlock your first brief" CTA in the hero so a
+          visitor landing from an ad has a paid action visible without
+          scrolling. */}
+      <section className="mx-auto max-w-7xl px-6 pb-12 pt-12 text-center md:pb-16 md:pt-24">
         <span className="mb-4 block font-mono text-xs font-semibold uppercase tracking-[0.15em] text-plum-500">
           Pricing
         </span>
-        <h1 className="mb-6 font-display text-5xl font-semibold tracking-tight text-ink-700 md:text-6xl">
+        <h1 className="mb-6 font-display text-4xl font-semibold tracking-tight text-ink-700 md:text-6xl">
           Three ways to use Pannly
         </h1>
         {/* Definitional paragraph for AI Overviews extraction. The
@@ -72,6 +76,17 @@ export default function PricingPage() {
           Whether you're exploring your first idea or shipping your tenth product, we have a
           model that respects your craftsmanship.
         </p>
+
+        {/* Early in-hero CTA so mobile visitors landing from an ad have an
+            action above the 667px fold. Same destination as the Per Unlock
+            card's CTA below — repetition is intentional, not redundant. */}
+        <button
+          type="button"
+          onClick={() => router.push("/feed" as Route)}
+          className="mt-8 inline-flex min-h-11 items-center justify-center rounded-xl bg-moss-600 px-6 py-3 text-base font-medium text-cream-50 shadow-sm transition-opacity hover:opacity-90"
+        >
+          Unlock your first brief — ${unlockPrice}
+        </button>
       </section>
 
       {/* Plans */}

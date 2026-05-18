@@ -60,7 +60,14 @@ export function TopNav() {
   return (
     <nav className="relative w-full border-b border-cream-300 bg-cream-50">
       <div className="px-6 md:px-12 flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center" aria-label="Pannly home">
+        {/* min-h-11 on the logo Link gives the tap zone 44px height even
+            though the wordmark text itself renders shorter. WCAG 2.5.5 hit
+            area applies to the link's bounding box. */}
+        <Link
+          href="/"
+          className="flex min-h-11 items-center"
+          aria-label="Pannly home"
+        >
           <Wordmark />
         </Link>
 
@@ -99,20 +106,26 @@ export function TopNav() {
             <>
               <Link
                 href="/login"
-                className="hidden font-display text-sm tracking-tight text-moss-500 transition-colors hover:text-plum-500 md:block"
+                // min-h-11 = 44px tap target. Was 20px-tall on desktop and
+                // failing WCAG 2.5.5 even though desktop pointer precision
+                // makes it less critical there. Matches the spec everywhere.
+                className="hidden min-h-11 items-center font-display text-sm tracking-tight text-moss-500 transition-colors hover:text-plum-500 md:flex"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl bg-moss-600 px-4 py-2 text-sm text-cream-50 transition-opacity hover:opacity-90"
+                // Was 36px tall on mobile. Bumping vertical padding to land
+                // at 44px-min while preserving the desktop look.
+                className="inline-flex min-h-11 items-center rounded-xl bg-moss-600 px-4 py-3 text-sm text-cream-50 transition-opacity hover:opacity-90"
               >
                 Get started
               </Link>
             </>
           )}
 
-          {/* Hamburger — mobile only */}
+          {/* Hamburger — mobile only. h-11 w-11 = 44x44px (WCAG 2.5.5
+              minimum tap target). Was 36x36px which the visual audit flagged. */}
           <button
             ref={buttonRef}
             type="button"
@@ -120,7 +133,7 @@ export function TopNav() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav-panel"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-cream-300 bg-cream-50 text-ink-700 transition-colors hover:bg-cream-200 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-cream-300 bg-cream-50 text-ink-700 transition-colors hover:bg-cream-200 md:hidden"
           >
             {mobileOpen ? (
               <X className="h-4 w-4" strokeWidth={1.75} aria-hidden />

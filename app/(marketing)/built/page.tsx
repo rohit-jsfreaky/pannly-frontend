@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { GalleryView } from "@/components/gallery/gallery-view";
@@ -9,16 +10,51 @@ import {
   schemaJson,
 } from "@/lib/seo/schemas";
 
-export const metadata = pageMetadata({
+const BASE_METADATA = pageMetadata({
   title: "Build Gallery",
   path: "/built",
   description:
     "Real builders shipping real products from $3 idea unlocks — every project here got a refund.",
 });
 
+/**
+ * Conditional indexing: until the gallery has shipped builds, we noindex it
+ * to avoid Google evaluating an empty placeholder as thin content. The fetch
+ * happens at metadata-resolve time so the page doesn't hide useful content
+ * once builds exist.
+ *
+ * Returns to indexable as soon as `total_count >= 1`. Sitemap inclusion is
+ * managed separately and remains active either way.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  let hasBuilds = false;
+  try {
+    const res = await fetchGallery({ page: 1, per_page: 1 });
+    hasBuilds = (res.pagination?.total_count ?? 0) > 0;
+  } catch {
+    // Backend down — preserve current indexing posture (noindex). Conservative
+    // failure mode: better to under-index than to publish an empty page.
+    hasBuilds = false;
+  }
+  return {
+    ...BASE_METADATA,
+    robots: hasBuilds
+      ? undefined
+      : {
+          index: false,
+          follow: true,
+          googleBot: { index: false, follow: true },
+        },
+  };
+}
+
 const BREADCRUMB = buildBreadcrumbSchema([
   { name: "Build Gallery", path: "/built" },
 ]);
+
+// New builds land at most a few times a day. 5-minute cache is fine and keeps
+// the gallery listing snappy for crawlers that hit /built repeatedly.
+export const revalidate = 300;
 
 /**
  * /built — public Build Gallery. Auth-free; everything renders for anon users.

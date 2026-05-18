@@ -142,8 +142,13 @@ export function LockedView({ data }: Props) {
             <Lock className="h-4 w-4" strokeWidth={2} aria-hidden />
             Unlock for {formatMoney(idea.unlock_price_cents)}
           </Button>
-          <p className="font-mono text-xs uppercase tracking-wider text-cream-400">
-            Refunded automatically if you ship within 30 days
+          {/* Was font-mono text-xs (12px) in pale cream-400 (failed WCAG AA
+              contrast against the cream background). Bumped to text-sm with
+              ink-50 weight + medium so the most important trust signal in the
+              entire paywall is legible at a glance. */}
+          <p className="text-sm font-medium leading-snug text-ink-50">
+            <span className="text-moss-700">Refunded automatically</span>{" "}
+            if you ship within 30 days.
           </p>
         </div>
 

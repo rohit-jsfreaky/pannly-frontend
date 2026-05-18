@@ -48,9 +48,12 @@ export function BackLink({
     <button
       type="button"
       onClick={onClick}
+      // min-h-11 = 44px tap target. The text-only link was rendering at 18px
+      // tall and failing WCAG 2.5.5. Negative margin keeps the visual hit
+      // under the same baseline so the layout doesn't shift.
       className={
         className ??
-        "inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 transition-colors hover:text-ink-500"
+        "-ml-3 inline-flex min-h-11 items-center gap-2 rounded px-3 font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400 transition-colors hover:text-ink-500"
       }
     >
       <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden />

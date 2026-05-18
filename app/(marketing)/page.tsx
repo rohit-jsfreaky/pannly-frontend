@@ -12,15 +12,30 @@ import { RefundTimeline } from "@/components/marketing/refund-timeline";
 import { HomePagePrefetcher } from "@/components/marketing/route-prefetcher";
 import { WhereWeListen } from "@/components/marketing/where-we-listen";
 import { SkeletonBlock } from "@/components/ui/skeleton-block";
-import { buildSpeakableWebPage, schemaJson } from "@/lib/seo/schemas";
+import { env } from "@/lib/env";
+import { LANDING_FAQ } from "@/lib/seo/landing-faq-data";
+import {
+  buildFaqPage,
+  buildSoftwareApplication,
+  buildSpeakableWebPage,
+  schemaJson,
+} from "@/lib/seo/schemas";
 
 export const metadata: Metadata = {
-  title: "Pannly — Find an idea worth building. Get refunded if you actually ship.",
+  // Removed the trailing brand suffix — Next adds it automatically via
+  // `metadataBase` + the parent template, and the brand is already the first
+  // word of this title. Keeping both was eating ~9 chars of the SERP budget.
+  title: "Find an idea worth building. Get refunded if you actually ship.",
   description:
     "A curated archive of high-signal software ideas sourced from real business pain points. Unlock a brief, build the solution, and we return your pledge.",
   alternates: { canonical: "/" },
   openGraph: { url: "/" },
 };
+
+// Cache the homepage HTML at the edge for 5 minutes. LiveNumbers refetches on
+// regeneration so the displayed counters lag the DB by at most 5 min — a fair
+// trade for not paying the SSR roundtrip on every visitor.
+export const revalidate = 300;
 
 // SpeakableSpecification: marks the H1 and any element with .geo-speakable as
 // the preferred passage for voice assistants and AI Overviews. Hero.tsx
@@ -30,6 +45,22 @@ const SPEAKABLE_HOMEPAGE = buildSpeakableWebPage({
   name: "Pannly — Indie idea finder with refund-on-ship pricing",
   description:
     "Pannly is a startup idea finder that surfaces validated software opportunities from real Reddit and Hacker News pain threads, priced at $3 per brief with an automatic refund if you ship within 30 days.",
+});
+
+// SoftwareApplication: the most specific schema type for a SaaS product.
+// Unlocks Google's Software rich result eligibility (price, OS, category
+// chips). Renders alongside the WebPage block.
+const HOMEPAGE_SOFTWARE = buildSoftwareApplication({
+  unlockUsd: env.prices.unlockDefaultUsd,
+});
+
+// FAQPage: AI engines (Perplexity, ChatGPT, Bing Copilot, AI Overviews)
+// preferentially extract Q&A pairs declared in this schema for citation
+// in their answer cards. Google rich-result accordions are not eligible on
+// commercial pages post-Aug 2023, but the AI citation upside is real.
+const HOMEPAGE_FAQ = buildFaqPage({
+  url: "/",
+  qas: LANDING_FAQ.map((item) => ({ question: item.q, answer: item.a })),
 });
 
 /**
@@ -55,6 +86,14 @@ export default function LandingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaJson(SPEAKABLE_HOMEPAGE) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(HOMEPAGE_SOFTWARE) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: schemaJson(HOMEPAGE_FAQ) }}
       />
       {/* Programmatically prefetches the most-likely-next routes (feed,
           pricing, how-it-works, refunds, built, about) once the homepage
