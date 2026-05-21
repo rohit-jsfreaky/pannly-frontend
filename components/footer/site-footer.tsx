@@ -8,8 +8,8 @@ type FooterLink = { href: Route | string; label: string; external?: boolean };
 const links: FooterLink[] = [
   { href: "/about", label: "About" },
   { href: "/how-it-works", label: "How it works" },
+  { href: "/guides", label: "Idea Guides" },
   { href: "/startup-ideas", label: "Startup Ideas" },
-  { href: "/gummysearch-alternative", label: "GummySearch Alternative" },
   { href: "/built", label: "Build Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/refunds", label: "Refunds" },

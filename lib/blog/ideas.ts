@@ -8,9 +8,16 @@
 
 import { fetchFeed, type FeedIdea } from "@/lib/api/feed";
 
-/** Top score-sorted ideas, optionally filtered to one topic. */
+/**
+ * Top score-sorted ideas, optionally filtered by topic and/or free-text query.
+ *
+ * When a `q` is supplied (niche vertical pages) and the search returns nothing,
+ * we fall back to the top-scored ideas so the page still shows real cards rather
+ * than an empty section. The prose carries the niche framing either way.
+ */
 export async function safeBlogIdeas(opts: {
   topic?: string;
+  q?: string;
   perPage: number;
 }): Promise<FeedIdea[]> {
   try {
@@ -19,8 +26,14 @@ export async function safeBlogIdeas(opts: {
       per_page: opts.perPage,
       sort: "score",
       topic: opts.topic ?? null,
+      q: opts.q ?? null,
     });
-    return res.items;
+    if (res.items.length > 0 || (!opts.q && !opts.topic)) return res.items;
+
+    // Niche search came back empty (or topic had no ideas) — fall back to the
+    // top-scored general feed so the page never renders an empty list.
+    const fallback = await fetchFeed({ page: 1, per_page: opts.perPage, sort: "score" });
+    return fallback.items;
   } catch {
     return [];
   }
