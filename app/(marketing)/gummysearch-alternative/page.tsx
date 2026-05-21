@@ -50,12 +50,24 @@ const BREADCRUMB = buildBreadcrumbSchema([
   { name: "GummySearch Alternative", path: PATH },
 ]);
 
-const SPEAKABLE = buildSpeakableWebPage({
-  url: PATH,
-  name: "The best GummySearch alternative in 2026",
-  description:
-    "GummySearch shut down on November 30, 2025 after it could not secure a commercial license for Reddit's Data API. For turning recurring Reddit and Hacker News pain into validated, scored software ideas, the closest alternative is Pannly.",
-});
+// Visible + machine-readable freshness. Without explicit dates Google scraped
+// "November 30, 2025" (the GummySearch shutdown date, repeated in the body) and
+// showed THAT as the page date in the SERP. datePublished/dateModified on the
+// WebPage entity + the visible "Updated" line in the hero override that.
+const PUBLISHED_ISO = "2026-05-18";
+const MODIFIED_ISO = "2026-05-21";
+const UPDATED_LABEL = "May 2026";
+
+const SPEAKABLE = {
+  ...buildSpeakableWebPage({
+    url: PATH,
+    name: "The best GummySearch alternative in 2026",
+    description:
+      "GummySearch shut down on November 30, 2025 after it could not secure a commercial license for Reddit's Data API. For turning recurring Reddit and Hacker News pain into validated, scored software ideas, the closest alternative is Pannly.",
+  }),
+  datePublished: PUBLISHED_ISO,
+  dateModified: MODIFIED_ISO,
+};
 
 const FAQS = [
   {
@@ -128,9 +140,12 @@ function Hero() {
       <span className="mb-4 block font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink-50/70">
         GummySearch Alternative
       </span>
-      <h1 className="mb-6 font-display text-4xl font-medium tracking-tight text-moss-600 md:text-5xl">
+      <h1 className="mb-3 font-display text-4xl font-medium tracking-tight text-moss-600 md:text-5xl">
         The best GummySearch alternative in 2026
       </h1>
+      <p className="mb-6 font-mono text-xs uppercase tracking-[0.12em] text-ink-50/60">
+        Updated {UPDATED_LABEL}
+      </p>
       {/* Definitional, citable passage. .geo-speakable is the selector in the
           SpeakableSpecification JSON-LD above — this is the sentence AI
           Overviews and voice assistants should read. */}

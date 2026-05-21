@@ -52,7 +52,10 @@ const STATIC_ROUTES: StaticRoute[] = [
   { path: "/refunds" },                 // ledger — dynamic
   { path: "/pricing",      lastmod: "2026-05-14" },
   { path: "/how-it-works", lastmod: "2026-05-14" },
-  { path: "/gummysearch-alternative", lastmod: "2026-05-18" },
+  { path: "/gummysearch-alternative", lastmod: "2026-05-21" },
+  { path: "/saas-ideas-2026", lastmod: "2026-05-21" },
+  { path: "/micro-saas-ideas", lastmod: "2026-05-21" },
+  { path: "/startup-ideas", lastmod: "2026-05-21" },
   { path: "/about",        lastmod: "2026-05-14" },
   { path: "/contact",      lastmod: "2026-05-14" },
   { path: "/privacy",      lastmod: "2026-05-01" },
